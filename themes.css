@@ -1,66 +1,121 @@
-/* Design candidates. Each theme only overrides variables plus a few structural rules. Chosen with the selector in the top bar. */
-.themesel { margin-left: auto; margin-bottom: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 2px 6px; font-size: 13px; color: var(--muted); }
-html[data-theme] body { line-break: strict; }
-html[data-theme] h1, html[data-theme] h2, html[data-theme] h3 { text-wrap: pretty; }
-
-/* ---------- A. Broadsheet: paper tone, serif headlines, ruled items ---------- */
-html[data-theme=broadsheet] {
-  --bg: #f7f3ec; --surface: #fffdf9; --ink: #1d1a16; --muted: #5e574d; --line: #e0d8ca;
-  --accent: #9b1c3a; --accent-ink: #ffffff; --soft: #f4e7e4;
-  --l1: #2f6b3a; --l1b: #e6efe2; --l2: #1f5582; --l2b: #e3ecf4; --l3: #6a3d7a; --l3b: #efe6f1;
-  --serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+/* Round 3: G pop / H rank / I warm. Sans only, weight contrast, one colour per category. */
+html[data-theme=pop] {
+  --sans: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  --round: "Hiragino Maru Gothic ProN", "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", sans-serif;
+  --num: "Segoe UI", "SF Pro Display", system-ui, sans-serif;
+  --font: var(--sans);
+  --c: #64748b; --ct: #eef2f7; --cx: #475569;
+  --l1: #15803d; --l1b: #dcfce7; --l2: #1d4ed8; --l2b: #dbeafe; --l3: #374151; --l3b: #e5e7eb;
+  --warn: #8a5300; --warnb: #fff1d6; --new: #be185d; --newb: #fce7f3;
 }
-@media (prefers-color-scheme: dark) { html[data-theme=broadsheet] {
-  --bg: #1a1714; --surface: #221e1a; --ink: #ece6dc; --muted: #a89f92; --line: #3a332c;
-  --accent: #f09aa8; --accent-ink: #1a1714; --soft: #33231f;
-  --l1: #8fd19a; --l1b: #1b2a1d; --l2: #8cbbe4; --l2b: #172636; --l3: #d3a9e0; --l3b: #2a1d30;
-} }
-html[data-theme=broadsheet] body { font-size: 16.5px; line-height: 1.85; }
-html[data-theme=broadsheet] .top { border-bottom: 3px solid var(--ink); }
-html[data-theme=broadsheet] .brand, html[data-theme=broadsheet] h1, html[data-theme=broadsheet] h2, html[data-theme=broadsheet] h3, html[data-theme=broadsheet] .ev-title { font-family: var(--serif); font-weight: 700; }
-html[data-theme=broadsheet] .card { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; padding: 14px 2px; }
-html[data-theme=broadsheet] .card.event { padding: 12px 2px; }
-html[data-theme=broadsheet] .read, html[data-theme=broadsheet] .sidebox { border-radius: 2px; }
-html[data-theme=broadsheet] .daterow { font-size: 13px; letter-spacing: .08em; border-bottom: 0; border-top: 2px solid var(--ink); padding-top: 6px; }
-html[data-theme=broadsheet] #tabs a { font-family: var(--serif); }
-
-/* ---------- B. Data Desk: white, dense, tabular, underline tabs ---------- */
-html[data-theme=datadesk] {
-  --bg: #ffffff; --surface: #ffffff; --ink: #111827; --muted: #4b5563; --line: #e5e7eb;
-  --accent: #1d4ed8; --accent-ink: #ffffff; --soft: #eff4ff;
-  --l1: #146c43; --l1b: #e3f3ea; --l2: #1d4ed8; --l2b: #e7eefd; --l3: #6b3fa0; --l3b: #f0e9f8;
-  --font: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Meiryo", sans-serif;
+html[data-theme=pop] .cat-markets { --c: #3b82f6; --ct: #dbeafe; --cx: #1d4ed8; }
+html[data-theme=pop] .cat-japan { --c: #f97316; --ct: #ffedd5; --cx: #c2410c; }
+html[data-theme=pop] .cat-global { --c: #14b8a6; --ct: #ccfbf1; --cx: #0f766e; }
+html[data-theme=pop] .cat-politics { --c: #8b5cf6; --ct: #ede9fe; --cx: #6d28d9; }
+html[data-theme=pop] .cat-industry { --c: #eab308; --ct: #fef9c3; --cx: #a16207; }
+html[data-theme=pop] .cat-society { --c: #ec4899; --ct: #fce7f3; --cx: #be185d; }
+@media (prefers-color-scheme: dark) {
+  html[data-theme=pop] { --l1: #86efac; --l1b: #14301f; --l2: #93c5fd; --l2b: #172a46; --l3: #d1d5db; --l3b: #2a2f3a; --warn: #f1b65a; --warnb: #2b2111; --new: #f9a8d4; --newb: #4a1d33; --ct: #1f2937; --cx: #cbd5e1; }
+  html[data-theme=pop] .cat-markets { --ct: #1e3a5f; --cx: #93c5fd; }
+  html[data-theme=pop] .cat-japan { --ct: #4a2a14; --cx: #fdba74; }
+  html[data-theme=pop] .cat-global { --ct: #123f3b; --cx: #5eead4; }
+  html[data-theme=pop] .cat-politics { --ct: #33265a; --cx: #c4b5fd; }
+  html[data-theme=pop] .cat-industry { --ct: #423a10; --cx: #fde047; }
+  html[data-theme=pop] .cat-society { --ct: #4a1d33; --cx: #f9a8d4; }
 }
-@media (prefers-color-scheme: dark) { html[data-theme=datadesk] {
-  --bg: #0b0e14; --surface: #121722; --ink: #e6e9ef; --muted: #9aa4b2; --line: #232a36;
-  --accent: #7aa2ff; --accent-ink: #0b0e14; --soft: #172036;
-  --l1: #6fd3a0; --l1b: #11291d; --l2: #93b4ff; --l2b: #17223b; --l3: #c9a6f5; --l3b: #261b3a;
-} }
-html[data-theme=datadesk] body { font-size: 15.5px; line-height: 1.75; font-variant-numeric: tabular-nums; border-top: 4px solid #e3120b; }
-html[data-theme=datadesk] .card { border-radius: 4px; padding: 10px 14px; box-shadow: none; }
-html[data-theme=datadesk] .card h3 { font-size: 16px; }
-html[data-theme=datadesk] .sidebox { border-radius: 4px; }
-html[data-theme=datadesk] .layout { grid-template-columns: minmax(0, 1fr) 272px; }
-html[data-theme=datadesk] #tabs a { border-bottom-width: 2px; }
-html[data-theme=datadesk] .daterow { text-transform: none; font-variant-numeric: tabular-nums; }
 
-/* ---------- C. Quiet Docs: calm navy, soft elevation, pill tabs ---------- */
-html[data-theme=quietdocs] {
-  --bg: #ffffff; --surface: #ffffff; --ink: #0f1b2d; --muted: #556070; --line: #e3e7ee;
-  --accent: #1f4f8f; --accent-ink: #ffffff; --soft: #eaf1fa;
-  --l1: #146c43; --l1b: #e3f3ea; --l2: #1d4ed8; --l2b: #e7eefd; --l3: #6b3fa0; --l3b: #f0e9f8;
+/* shared behaviour: three levels visible (rank, title, one reading line); the rest opens on click */
+html[data-theme=pop] body { line-height: 1.75; font-variant-numeric: tabular-nums; }
+html[data-theme=pop] :is(h1, h2, .brand, .page-title) { font-family: var(--round); font-weight: 800; letter-spacing: .01em; }
+html[data-theme=pop] :is(h3, .ev-title) { font-family: var(--sans); font-weight: 700; word-break: auto-phrase; line-break: strict; text-wrap: balance; }
+html[data-theme=pop] .layout { max-width: 1120px; display: block; padding: 0 20px; }
+html[data-theme=pop] .layout > main { max-width: none; }
+html[data-theme=pop] .page-title { font-size: 30px; margin: 32px 0 12px; }
+html[data-theme=pop] .page-title small { display: block; font: 500 14px/1.6 var(--sans); color: var(--muted); margin-top: 4px; }
+html[data-theme=pop] .hero { padding: 28px 0 8px; }
+html[data-theme=pop] .hero h1 { font-size: 34px; line-height: 1.25; }
+html[data-theme=pop] .hero p:not(.stat) { display: none; }
+html[data-theme=pop] .stat { color: var(--muted); font-size: 13px; }
+html[data-theme=pop] .block > h2 { font-size: 22px; margin: 28px 0 12px; }
+html[data-theme=pop] .block > h2 small { font: 500 13px var(--sans); color: var(--muted); margin-left: 10px; }
+html[data-theme=pop] .daterow { font: 800 15px var(--round); color: var(--ink); border: 0; margin: 32px 0 8px; }
+html[data-theme=pop] .weekbox > summary { font: 800 16px var(--round); padding: 10px 0; }
+html[data-theme=pop] .stack { gap: 12px; }
+html[data-theme=pop] .rank { display: inline-flex; align-items: center; justify-content: center; font: 800 14px var(--num); color: var(--cx); background: var(--ct); border-radius: 999px; min-width: 32px; height: 32px; padding: 0 8px; }
+html[data-theme=pop] .why1 { display: block; margin: 6px 0 0; font-size: 14px; color: var(--muted); line-height: 1.6; }
+html[data-theme=pop] .why1 a { color: var(--accent); font-weight: 700; text-decoration: none; margin-right: 8px; }
+html[data-theme=pop] .why1 a:hover { text-decoration: underline; }
+html[data-theme=pop] .why1-t { display: inline-block; font-size: 11px; font-weight: 800; color: var(--cx); background: var(--ct); border-radius: 4px; padding: 0 6px; margin-right: 8px; line-height: 18px; }
+html[data-theme=pop] .why1-w { display: block; margin-top: 2px; }
+html[data-theme=pop] .card { cursor: pointer; }
+html[data-theme=pop] .card.event:not(.open) .detail { display: none; }
+html[data-theme=pop] .card.event .detail { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+html[data-theme=pop] .card.event .ev-title { font-size: 18px !important; line-height: 1.5; margin: 6px 0 0; }
+html[data-theme=pop] .card.event .sum { font-size: 15px; margin: 0; line-height: 1.85; max-width: 46em; }
+html[data-theme=pop] .card.event .reads { margin-top: 12px; padding-top: 0; border-top: 0; }
+html[data-theme=pop] .card.event .read { background: var(--bg); }
+html[data-theme=pop] .card.event:not(.open) .heat { display: none; }
+html[data-theme=pop] .badge.cat { color: var(--cx); background: var(--ct); border-color: transparent; }
+html[data-theme=pop] .badge.l1 { color: var(--l1); background: var(--l1b); } html[data-theme=pop] .badge.l2 { color: var(--l2); background: var(--l2b); } html[data-theme=pop] .badge.l3 { color: var(--l3); background: var(--l3b); }
+html[data-theme=pop] .card:not(.event) h3 { font-size: 16px; line-height: 1.5; }
+html[data-theme=pop] .card:not(.event):not(.open) :is(.one, details.more, .origin, .sub) { display: none; }
+html[data-theme=pop] .card:not(.event) { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 20px; align-items: baseline; border-left: 4px solid var(--c); }
+html[data-theme=pop] .card:not(.event) > * { grid-column: 1 / -1; }
+html[data-theme=pop] .card:not(.event) > h3 { grid-column: 1; grid-row: 1; }
+html[data-theme=pop] .card:not(.event) > .meta { grid-column: 2; grid-row: 1; justify-content: flex-end; flex-wrap: nowrap; white-space: nowrap; font-size: 12.5px; }
+html[data-theme=pop] .card:not(.open) .meta :is(.badge.cat, .badge.scope, .badge.en, .badge.warn) { display: none; }
+html[data-theme=pop] .sidebox h3 { font: 800 14px var(--round); }
+html[data-theme=pop] #side { position: static; max-height: none; overflow: visible; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 48px; padding: 8px 0 24px; }
+html[data-theme=pop] .sidebox { max-height: 300px; overflow-y: auto; }
+html[data-theme=pop] .read h4::before { content: ""; }
+html[data-theme=pop] .themesel { margin-bottom: 0; }
+@media (max-width: 720px) {
+  html[data-theme=pop] .card:not(.event) { display: block; }
+  html[data-theme=pop] .hero h1 { font-size: 26px; }
 }
-@media (prefers-color-scheme: dark) { html[data-theme=quietdocs] {
-  --bg: #0e1420; --surface: #151d2b; --ink: #e7ecf3; --muted: #98a3b3; --line: #263042;
-  --accent: #8fb6ff; --accent-ink: #0e1420; --soft: #1a2740;
-  --l1: #6fd3a0; --l1b: #11291d; --l2: #93b4ff; --l2b: #17223b; --l3: #c9a6f5; --l3b: #261b3a;
-} }
-html[data-theme=quietdocs] body { line-height: 1.85; }
-html[data-theme=quietdocs] .card { border: 0; border-radius: 12px; padding: 16px 20px; box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(15, 27, 45, .06); }
-html[data-theme=quietdocs] .card.event { padding: 12px 18px; }
-html[data-theme=quietdocs] .sidebox { border: 0; border-radius: 12px; box-shadow: 0 0 0 1px var(--line); }
-html[data-theme=quietdocs] .sidebox h3 { font-size: 12.5px; color: var(--muted); letter-spacing: .06em; }
-html[data-theme=quietdocs] #tabs { background: var(--soft); border-radius: 999px; padding: 3px; gap: 2px; margin-bottom: 8px; }
-html[data-theme=quietdocs] #tabs a { border-bottom: 0; border-radius: 999px; padding: 6px 14px; }
-html[data-theme=quietdocs] #tabs a[aria-current="page"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
-html[data-theme=quietdocs] .brand { padding-bottom: 8px; }
+
+/* ---------- G. Pop Tiles ---------- */
+html[data-theme=pop] { --bg: #f7f8fc; --surface: #ffffff; --ink: #1f2333; --muted: #5b6178; --line: #e6e8f2; --accent: #5b5bf0; --accent-ink: #ffffff; --soft: #eeeeff; }
+@media (prefers-color-scheme: dark) { html[data-theme=pop] { --bg: #14151c; --surface: #1e2030; --ink: #ecedf5; --muted: #a3a8c3; --line: #2c2f45; --accent: #9b9bff; --accent-ink: #14151c; --soft: #26284a; } }
+html[data-theme=pop] .top { background: var(--surface); border-bottom: 0; box-shadow: 0 1px 0 var(--line); }
+html[data-theme=pop] .brand { font-size: 20px; }
+html[data-theme=pop] .brand::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #5b5bf0, #ec4899); margin-right: 8px; }
+html[data-theme=pop] #tabs { background: var(--soft); border-radius: 999px; padding: 3px; gap: 2px; margin-bottom: 8px; }
+html[data-theme=pop] #tabs a { border: 0; border-radius: 999px; padding: 6px 16px; }
+html[data-theme=pop] #tabs a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+html[data-theme=pop] .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+html[data-theme=pop] .card { background: var(--surface); border: 0; border-radius: 16px; box-shadow: 0 2px 10px rgb(30 30 70 / .07); padding: 18px 20px; }
+html[data-theme=pop] .card.event { border-top: 4px solid var(--c); }
+html[data-theme=pop] .card.event.top1 { grid-column: 1 / -1; background: linear-gradient(135deg, var(--ct), var(--surface) 70%); padding: 24px 28px; }
+html[data-theme=pop] .card.event.top1 .ev-title { font-size: 24px !important; }
+html[data-theme=pop] .card.event.top1 .rank { background: var(--accent); color: var(--accent-ink); }
+html[data-theme=pop] .card.event.top1::after { content: "今週のTOP"; position: absolute; top: 18px; right: 22px; font: 800 12px var(--round); color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 2px 12px; }
+html[data-theme=pop] .card.event { position: relative; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; row-gap: 0; align-items: center; }
+html[data-theme=pop] .card.event > * { grid-column: 1 / -1; }
+html[data-theme=pop] .card.event > .rank { grid-column: 1; grid-row: 1; }
+html[data-theme=pop] .card.event > .meta { grid-column: 2; grid-row: 1; }
+html[data-theme=pop] .card.top3:not(.top1) .rank { background: var(--c); color: #fff; }
+html[data-theme=pop] .card:not(.event) { border-radius: 12px; border-left: 0; box-shadow: none; border: 1px solid var(--line); padding: 12px 16px; }
+html[data-theme=pop] .card:not(.event):hover { background: var(--soft); }
+html[data-theme=pop] .sidebox { border: 0; border-radius: 16px; background: var(--soft); }
+@media (max-width: 720px) { html[data-theme=pop] .stack { grid-template-columns: 1fr; } }
+
+
+/* library: only search and period are visible; the rest folds away */
+html[data-theme=pop] .fopts { margin-top: 8px; }
+html[data-theme=pop] .fopts > summary, html[data-theme=pop] .tpbox > summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--accent); }
+html[data-theme=pop] .filters { background: var(--surface); border: 0; border-radius: 16px; box-shadow: 0 2px 10px rgb(30 30 70 / .07); padding: 14px 18px; margin-bottom: 12px; position: static; }
+html[data-theme=pop] .tpbox { border-radius: 16px; box-shadow: none; border: 1px solid var(--line); cursor: default; padding: 12px 18px; }
+html[data-theme=pop] .chip { border-radius: 999px; }
+html[data-theme=pop] .count { color: var(--muted); font-size: 13px; }
+
+@media (max-width: 720px) {
+  html[data-theme=pop] .bar { gap: 8px; }
+  html[data-theme=pop] #tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  html[data-theme=pop] #tabs a { white-space: nowrap; padding: 6px 12px; font-size: 13.5px; }
+  html[data-theme=pop] .card.event.top1 { padding: 18px 18px; }
+  html[data-theme=pop] .card.event.top1 .ev-title { font-size: 19px !important; }
+  html[data-theme=pop] .card.event .ev-title { font-size: 16.5px !important; }
+  html[data-theme=pop] .layout { padding: 0 14px; }
+  html[data-theme=pop] .card.event.top1::after { top: 14px; right: 14px; }
+}

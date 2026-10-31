@@ -556,7 +556,7 @@
     month.disabled = !state.year; period.disabled = !!state.year;
     // fine-grained sub-categories (themes, regions, trends, policy, labour, consulting, law); several can be combined
     var tpSum = h('summary', null), tpBody = h('div');
-    var tpBox = h('details', { 'class': 'card tpbox', open: true }, tpSum, tpBody);
+    var tpBox = h('details', { 'class': 'card tpbox' }, tpSum, tpBody);
     function paintTp() {
       var cnt = {};
       D.articles.forEach(function (a) { if (baseMatch(a)) (a.tp || []).forEach(function (l) { cnt[l] = (cnt[l] || 0) + 1; }); });
@@ -578,12 +578,13 @@
     var hasOther = D.articles.some(function (a) { return a.cat === 'other'; });
     var f = h('div', { 'class': 'filters' },
       h('div', { 'class': 'frow' }, q, period, year, month, src),
+      h('details', { 'class': 'fopts' }, h('summary', null, '分野・レベル・視点などで絞り込む'),
       chips('分野', [['all', 'すべて']].concat(D.categories.filter(function (c) { return c.id !== 'other' || hasOther; }).map(function (c) { return [c.id, c.name, c.desc]; })), 'cat', paint),
       chips('レベル', [['all', 'すべて']].concat(D.levels.map(function (l) { return [String(l.id), l.name, l.desc]; })), 'level', paint),
       chips('視点', [['all', 'すべて']].concat(D.scopes.map(function (s) { return [s.id, s.name, s.desc]; })), 'scope', paint),
       chips('言語', [['all', 'すべて'], ['ja', '日本語'], ['en', '英語']], 'lang', paint),
       chips('範囲', [['all', 'すべての収集', '見出しだけのものも含む'], ['summary', '要約あり']], 'mode', paint),
-      viewToggle(paint));
+      viewToggle(paint)));
     page.appendChild(f); page.appendChild(tpBox); page.appendChild(results);
     paint();
     return page;
