@@ -684,12 +684,25 @@
       return s;
     }).join('\n---\n\n');
   }
+  var nst = { kind: 'all', cat: 'all', level: 'all', src: 'all', tp: 'all', per: 'all', has: 'all' };
   function notesPage() {
     var page = h('div');
     var where = Store.mode() === 'server' ? '保存先：data\\notes.json（OneDriveと同期）' : '保存先：このブラウザの中だけ（start.cmd から開くと、ファイルに保存されます）';
     page.appendChild(h('h2', { 'class': 'page-title' }, 'ノート', h('small', null, where)));
     page.appendChild(aiSettings());
     var list = h('div'), todo = h('div');
+    function nsel(label, key, opts) {
+      return h('select', { 'class': 'field', 'aria-label': label, onchange: function (e) { nst[key] = e.target.value; paint(); } },
+        opts.map(function (o) { return h('option', { value: o[0], selected: nst[key] === o[0] }, o[1]); }));
+    }
+    function noteSrcs() {
+      var m = {}; allNotes().forEach(function (n) { var s = n.aid && byId[n.aid] ? byId[n.aid].src : n.aSrc; if (s) m[s] = 1; });
+      return Object.keys(m).sort();
+    }
+    function noteTps() {
+      var m = {}; allNotes().forEach(function (n) { var a = n.aid ? byId[n.aid] : null; if (a) (a.tp || []).forEach(function (t) { m[t] = 1; }); });
+      return Object.keys(m).sort();
+    }
     function paint() {
       todo.textContent = ''; list.textContent = '';
       var ns = allNotes().sort(function (a, b) { return (b.updated || '') < (a.updated || '') ? -1 : 1; });
@@ -701,6 +714,14 @@
       var q = state.nq.toLowerCase();
       var shown = ns.filter(function (n) {
         if (state.nkind === 'article' && !n.aid) return false; if (state.nkind === 'memo' && n.aid) return false;
+        var a = n.aid ? byId[n.aid] : null;
+        if (nst.kind !== 'all' && !(a && a.kind === nst.kind)) return false;
+        if (nst.cat !== 'all' && !(a && a.cat === nst.cat)) return false;
+        if (nst.level !== 'all' && !(a && String(a.level) === nst.level)) return false;
+        if (nst.src !== 'all' && !(a && a.src === nst.src) && n.aSrc !== nst.src) return false;
+        if (nst.tp !== 'all' && !(a && (a.tp || []).indexOf(nst.tp) >= 0)) return false;
+        if (nst.per !== 'all' && (n.updated || '').slice(0, 10) < daysAgo(+nst.per)) return false;
+        if (nst.has !== 'all' && !(n[nst.has] || '').trim()) return false;
         if (!q) return true;
         return [n.title, n.aTitle, n.body, n.unclear, n.learned, n.todo].join(' ').toLowerCase().indexOf(q) >= 0;
       });
@@ -726,6 +747,14 @@
         h('button', { 'class': 'btn', type: 'button', onclick: function () { Store.create({ title: '' }); state.nkind = 'all'; paint(); var d = list.querySelector('details'); if (d) d.open = true; } }, '新しいメモ'), q,
         h('select', { 'class': 'field', 'aria-label': '種類', onchange: function (e) { state.nkind = e.target.value; paint(); } },
           [['all', 'すべて'], ['article', '記事ノート'], ['memo', '自由メモ']].map(function (o) { return h('option', { value: o[0], selected: state.nkind === o[0] }, o[1]); }))),
+      h('div', { 'class': 'frow' }, h('label', null, '絞り込み'),
+        nsel('記事かレポートか', 'kind', [['all', '記事・レポート両方'], ['article', '記事'], ['report', 'レポート']]),
+        nsel('分野', 'cat', [['all', 'すべての分野']].concat(D.categories.map(function (c) { return [c.id, c.name]; }))),
+        nsel('レベル', 'level', [['all', 'すべてのレベル']].concat(D.levels.map(function (l) { return [String(l.id), l.name]; }))),
+        nsel('機関', 'src', [['all', 'すべての機関']].concat(noteSrcs().map(function (s) { return [s, s]; }))),
+        nsel('細分類', 'tp', [['all', 'すべての細分類']].concat(noteTps().map(function (s) { return [s, s]; }))),
+        nsel('更新', 'per', [['all', 'いつでも'], ['7', '7日以内'], ['30', '30日以内'], ['90', '90日以内']]),
+        nsel('書いた欄', 'has', [['all', 'すべて'], ['todo', '調べたいことあり'], ['unclear', 'わからないところあり'], ['learned', '学んだことあり']])),
       h('div', { 'class': 'frow' },
         h('button', { 'class': 'btn ghost', type: 'button', onclick: function () { download('notes.md', notesMarkdown(), 'text/markdown'); } }, 'Markdownで保存'),
         h('button', { 'class': 'btn ghost', type: 'button', onclick: function () { download('notes.json', JSON.stringify({ notes: allNotes() }, null, 2), 'application/json'); } }, 'バックアップ（JSON）'),
