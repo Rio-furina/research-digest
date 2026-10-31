@@ -426,11 +426,61 @@
     sideEl.appendChild(glossEl);
   }
 
+  // Home search: type a word, get related events, articles and reports at once (best matches first).
+  function homeSearch() {
+    var out = h('div', { 'class': 'hs-out' });
+    var input = h('input', { 'class': 'field hs-in', type: 'search', placeholder: '気になる言葉で探す（例：物価、日銀、為替、AI）', 'aria-label': 'サイト内検索' });
+    function score(a, qs) {
+      var t = (a.title || '').toLowerCase(), g = (a.tags || []).join(' ').toLowerCase(), o = [a.one, a.sum, a.plain, a.src, (a.terms || []).map(function (x) { return x.t; }).join(' ')].join(' ').toLowerCase(), s = 0;
+      for (var i = 0; i < qs.length; i++) {
+        var hit = 0;
+        if (t.indexOf(qs[i]) >= 0) hit += 3; if (g.indexOf(qs[i]) >= 0) hit += 2; if (o.indexOf(qs[i]) >= 0) hit += 1;
+        if (!hit) return 0; s += hit;
+      }
+      return s;
+    }
+    function group(title, items, kind) {
+      var box = h('section', { 'class': 'hs-group' }, h('h3', null, title, h('span', { 'class': 'cnt' }, items.length + '件')));
+      var list = h('div', { 'class': 'stack' });
+      items.slice(0, 5).forEach(function (r) { list.appendChild(articleCard(r.a, false)); });
+      box.appendChild(list);
+      if (items.length > 5) box.appendChild(h('p', { 'class': 'origin' }, h('button', { 'class': 'tag', type: 'button', onclick: function () { state.kind = kind; goSearch(input.value.trim()); location.hash = kind === 'report' ? '#reports' : '#articles'; } }, 'すべて見る（' + items.length + '件）→')));
+      return box;
+    }
+    function run() {
+      out.textContent = '';
+      var q = input.value.trim().toLowerCase(); if (!q) return;
+      var qs = q.split(/\s+/).filter(Boolean), hits = { article: [], report: [] };
+      D.articles.forEach(function (a) { var s = score(a, qs); if (s) (hits[a.kind === 'report' ? 'report' : 'article']).push({ a: a, s: s }); });
+      ['article', 'report'].forEach(function (k) { hits[k].sort(function (x, y) { return (y.s - x.s) || ((adate(y.a) || '') < (adate(x.a) || '') ? -1 : 1) || 0; }); });
+      var evs = [];
+      (D.topicSets || []).forEach(function (s) { s.topics.forEach(function (t) {
+        var fake = { title: t.title, tags: t.tags, one: t.blurb, sum: '', plain: '', src: '', terms: [] };
+        var sc = score(fake, qs); if (sc) evs.push({ t: t, s: sc, d: s.date });
+      }); });
+      evs.sort(function (x, y) { return (y.s - x.s) || (y.d < x.d ? -1 : 1); });
+      if (evs.length) {
+        var eb = h('section', { 'class': 'hs-group' }, h('h3', null, '関連する出来事', h('span', { 'class': 'cnt' }, evs.length + '件')));
+        var es = h('div', { 'class': 'stack' }); evs.slice(0, 3).forEach(function (e) { es.appendChild(eventCard(e.t, 0)); }); eb.appendChild(es); out.appendChild(eb);
+      }
+      if (hits.article.length) out.appendChild(group('関連する記事', hits.article, 'article'));
+      if (hits.report.length) out.appendChild(group('関連するレポート', hits.report, 'report'));
+      if (!evs.length && !hits.article.length && !hits.report.length) out.appendChild(h('p', { 'class': 'empty' }, '「' + input.value.trim() + '」に合うものは見つかりませんでした。別の言葉や、短い言葉でお試しください。'));
+    }
+    var timer = null;
+    input.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(run, 150); });
+    var chips = h('div', { 'class': 'hs-chips' }, ['物価', '日銀', '金利', '為替', 'トランプ', 'AI', '賃金', '財政'].map(function (w) {
+      return h('button', { 'class': 'tag', type: 'button', onclick: function () { input.value = w; run(); } }, w);
+    }));
+    return h('section', { 'class': 'hs' }, input, chips, out);
+  }
+
   function home() {
     var page = h('div');
     var total = D.articles.length, sums = D.articles.filter(function (a) { return !a.raw; }).length;
     page.appendChild(h('section', { 'class': 'hero' }, h('h1', null, D.site.title), h('p', null, D.site.subtitle),
       h('p', { 'class': 'stat' }, '収集リンク ' + total + '本（うち要約 ' + sums + '本）　最終収集 ' + (D.latest ? fmtDate(D.latest) : 'なし') + '　更新 ' + D.generated)));
+    page.appendChild(homeSearch());
     var set = curWeek();
     var nreads = set ? set.topics.reduce(function (s, t) { return s + (t.reads || []).length; }, 0) : 0;
     var blk = h('section', { 'class': 'block' }, h('h2', null, '今週の出来事', h('small', null, set ? fmtDate(set.date) + '　読む記事は ' + nreads + '本' : '')));
