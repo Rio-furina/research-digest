@@ -2,7 +2,8 @@
   'use strict';
   var D = window.DIGEST;
   var app = document.getElementById('app');
-  var PUBLIC = !!(D && D.public);   // public build: read-only (no notes, no AI, no local API)
+  var PUBLIC = !!(D && D.public);
+  var ACCT = !!(PUBLIC && window.Acct && window.Acct.enabled);   // accounts required for My page (public build with Supabase configured)   // public build: read-only (no notes, no AI, no local API)
   var TABS = [['home', 'ホーム'], ['events', '出来事'], ['articles', '記事'], ['reports', 'レポート'], ['gloss', '用語集'], ['my', 'マイページ'], ['notes', 'ノート'], ['about', '使い方']]
     .filter(function (t) { return !(PUBLIC && t[0] === 'notes'); });
   var WD = ['日', '月', '火', '水', '木', '金', '土'];
@@ -813,13 +814,61 @@
     var d = {};
     try { d = JSON.parse(lsGet('my') || '{}') || {}; } catch (e) { d = {}; }
     d.marks = d.marks || {}; d.books = d.books || []; d.memos = d.memos || [];
-    return {
+    var timer = null;
+    function snap() { return { marks: d.marks, books: d.books, memos: d.memos }; }
+    function setSync(o) { lsSet('mysync', JSON.stringify(o)); }
+    function getSync() { try { return JSON.parse(lsGet('mysync') || '{}') || {}; } catch (e) { return {}; } }
+    function pushNow() {
+      var u = ACCT && window.Acct.user(); if (!u) return Promise.resolve();
+      return window.Acct.push(snap()).then(function () { setSync({ uid: u.id, dirty: false }); }, function () { /* offline: stays dirty, retried on next change / load */ });
+    }
+    function isEmpty(x) { return !Object.keys(x.marks || {}).length && !(x.books || []).length && !(x.memos || []).length; }
+    function union(a, b) {   // a = local, b = remote
+      var o = { marks: {}, books: [], memos: [] };
+      [a.marks || {}, b.marks || {}].forEach(function (m) { Object.keys(m).forEach(function (k) { var s = o.marks[k] || []; (m[k] || []).forEach(function (f) { if (s.indexOf(f) < 0) s.push(f); }); o.marks[k] = s; }); });
+      var bm = {};
+      (b.books || []).concat(a.books || []).forEach(function (bk) {
+        var t = bm[bk.id]; if (!t) { t = bm[bk.id] = { id: bk.id, name: bk.name, terms: [] }; o.books.push(t); }
+        (bk.terms || []).forEach(function (x) { var e = t.terms.filter(function (y) { return y.t === x.t; })[0]; if (!e) t.terms.push(x); else if (!e.memo && x.memo) e.memo = x.memo; });
+      });
+      var mm = {};
+      (b.memos || []).concat(a.memos || []).forEach(function (m) { var e = mm[m.id]; if (!e) { mm[m.id] = m; o.memos.push(m); } else if ((m.updated || '') > (e.updated || '')) { o.memos[o.memos.indexOf(e)] = m; mm[m.id] = m; } });
+      return o;
+    }
+    var api = {
       d: d,
-      save: function () { lsSet('my', JSON.stringify(d)); },
+      save: function () {
+        lsSet('my', JSON.stringify(d));
+        if (ACCT && window.Acct.user()) { setSync({ uid: window.Acct.user().id, dirty: true }); clearTimeout(timer); timer = setTimeout(pushNow, 1500); }
+      },
       replace: function (n) { d.marks = n.marks || {}; d.books = n.books || []; d.memos = n.memos || []; this.save(); },
-      uid: function () { return 'x' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
+      uid: function () { return 'x' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); },
+      // After sign-in / page load: reconcile this browser's copy with the account's cloud copy.
+      syncDown: function () {
+        var u = ACCT && window.Acct.user(); if (!u) return Promise.resolve();
+        var st = getSync(), mine = (st.uid === u.id);
+        return window.Acct.pull().then(function (r) {
+          var remote = r && r.data ? r.data : null;
+          var localDirty = !mine || st.dirty;     // data made before sign-in, or edits not yet uploaded
+          var local = snap();
+          if (!remote) { if (!isEmpty(local) && localDirty) return pushNow(); setSync({ uid: u.id, dirty: false }); return; }
+          var next = (localDirty && !isEmpty(local)) ? union(local, remote) : remote;
+          d.marks = next.marks || {}; d.books = next.books || []; d.memos = next.memos || [];
+          lsSet('my', JSON.stringify(d));
+          if (localDirty && !isEmpty(local)) return pushNow(); setSync({ uid: u.id, dirty: false });
+        }, function () { /* offline: keep local copy */ });
+      },
+      flush: function () { clearTimeout(timer); return pushNow(); },
+      wipeLocal: function () { d.marks = {}; d.books = []; d.memos = []; lsSet('my', JSON.stringify(d)); setSync({}); }
     };
+    return api;
   })();
+  // Gate: when sign-in is required (public build with accounts) and the visitor is not signed in, send them to the login screen.
+  function needLogin() {
+    if (!ACCT || window.Acct.user()) return false;
+    toast('ログインすると使えます'); if (location.hash !== '#my') location.hash = '#my'; else route();
+    return true;
+  }
   function markBar(key) {
     var cur = My.d.marks[key] || [];
     var bar = h('span', { 'class': 'markbar' + (cur.length ? ' has' : '') });
@@ -827,6 +876,7 @@
       var b = h('button', { 'class': 'mk', type: 'button', title: f[2], 'aria-label': f[2], 'aria-pressed': cur.indexOf(f[0]) >= 0 ? 'true' : 'false', 'data-f': f[0] }, f[1]);
       b.addEventListener('click', function (e) {
         e.stopPropagation();
+        if (needLogin()) return;
         var list = My.d.marks[key] || [], i = list.indexOf(f[0]);
         if (i >= 0) list.splice(i, 1); else list.push(f[0]);
         if (list.length) My.d.marks[key] = list; else delete My.d.marks[key];
@@ -852,6 +902,7 @@
   var gst = { q: '', cat: 'all', mark: false, limit: 60 };
   function addToBook(term, sel) {
     var v = sel.value; if (!v) return;
+    if (needLogin()) { sel.value = ''; return; }
     var b;
     if (v === '__new') { var nm = prompt('新しい用語帳の名前'); if (!nm || !nm.trim()) { sel.value = ''; return; } b = { id: My.uid(), name: nm.trim().slice(0, 40), terms: [] }; My.d.books.push(b); }
     else b = My.d.books.filter(function (x) { return x.id === v; })[0];
@@ -911,9 +962,81 @@
   }
   function openGloss(t) { gst.q = t; gst.cat = 'all'; gst.mark = false; gst.limit = 60; if (location.hash === '#gloss') route(); else location.hash = '#gloss'; }
 
+  // ---- sign-in (public build with accounts)
+  var AUTH_MSG = { 'Invalid login credentials': 'メールアドレスまたはパスワードが違います。', 'Email not confirmed': 'メールの確認がまだです。届いたメールのリンクを押してください。', 'User already registered': 'このメールアドレスは登録済みです。「ログイン」を押してください。', 'Signup requires a valid password': 'パスワードを入力してください。' };
+  function authMsg(e) {
+    var m = (e && e.message) || '';
+    if (AUTH_MSG[m]) return AUTH_MSG[m];
+    if (/at least \d+ char/i.test(m) || /weak/i.test(m)) return 'パスワードは8文字以上にしてください。';
+    if (/rate limit|too many/i.test(m)) return '短時間に何度も試されました。しばらくしてからお試しください。';
+    if (/Failed to fetch|NetworkError/i.test(m)) return '通信できませんでした。接続を確認してください。';
+    return 'うまくいきませんでした（' + m + '）';
+  }
+  function loginPage() {
+    var A = window.Acct;
+    var page = h('div', null, h('h2', { 'class': 'page-title' }, 'マイページ', h('small', null, 'ログインすると、マーク・用語帳・メモが使えます')));
+    var msg = h('p', { 'class': 'authmsg', role: 'status' }, A.notice || ''); A.notice = '';
+    var email = h('input', { 'class': 'field', type: 'email', autocomplete: 'email', placeholder: 'メールアドレス', 'aria-label': 'メールアドレス' });
+    var pw = h('input', { 'class': 'field', type: 'password', autocomplete: 'current-password', placeholder: 'パスワード（8文字以上）', 'aria-label': 'パスワード' });
+    function busy(b, on) { b.disabled = on; }
+    function run(btn, fn) {
+      var em = email.value.trim();
+      if (!em || em.indexOf('@') < 1) { msg.textContent = 'メールアドレスを入れてください。'; return; }
+      busy(btn, true); msg.textContent = '';
+      fn(em).then(function () {}, function (e) { msg.textContent = authMsg(e); }).then(function () { busy(btn, false); });
+    }
+    var bIn = h('button', { 'class': 'btn', type: 'button' }, 'ログイン');
+    var bUp = h('button', { 'class': 'btn ghost', type: 'button' }, '新規登録');
+    bIn.addEventListener('click', function () { run(bIn, function (em) { if (!pw.value) { msg.textContent = 'パスワードを入れてください。'; return Promise.resolve(); } return A.signIn(em, pw.value).then(afterSignIn); }); });
+    bUp.addEventListener('click', function () { run(bUp, function (em) {
+      if (pw.value.length < 8) { msg.textContent = 'パスワードは8文字以上にしてください。'; return Promise.resolve(); }
+      return A.signUp(em, pw.value).then(function (r) { if (r === 'in') return afterSignIn(); msg.textContent = '確認メールを送りました。メール内のリンクを押すと、登録が完了します。'; });
+    }); });
+    var bFg = h('button', { 'class': 'tag', type: 'button' }, 'パスワードを忘れた');
+    bFg.addEventListener('click', function () { run(bFg, function (em) { return A.reset(em).then(function () { msg.textContent = '再設定のメールを送りました（登録済みの場合）。メール内のリンクから新しいパスワードを設定してください。'; }); }); });
+    var google = h('button', { 'class': 'btn gbtn', type: 'button', onclick: function () { A.signInGoogle(); } }, 'Googleでログイン');
+    pw.addEventListener('keydown', function (e) { if (e.key === 'Enter') bIn.click(); });
+    page.appendChild(h('section', { 'class': 'block authbox' },
+      h('p', { 'class': 'lead' }, 'マーク（★⚑？✓）、用語帳、メモは、アカウントに保存されます。無料です。別の端末でも、同じ内容が使えます。'),
+      google,
+      h('p', { 'class': 'sub or' }, 'またはメールアドレスで'),
+      h('div', { 'class': 'stack' }, email, pw, h('div', { 'class': 'frow' }, bIn, bUp, bFg)),
+      msg,
+      h('p', { 'class': 'sub' }, '登録すると、', h('a', { href: 'terms.html' }, '利用規約'), 'と', h('a', { href: 'privacy.html' }, 'プライバシーポリシー'), 'に同意したものとみなします。ログインしなくても、記事・出来事・用語集は読めます。')));
+    return page;
+  }
+  function afterSignIn() { return My.syncDown().then(function () { toast('ログインしました'); route(); }); }
+  function accountBox() {
+    var A = window.Acct, u = A.user();
+    var box = h('section', { 'class': 'block acctbox' }, h('h2', null, 'アカウント'));
+    box.appendChild(h('p', { 'class': 'sub' }, 'ログイン中: ' + (u.email || '（メール非公開）') + '　内容は自動で保存されます。'));
+    if (A.recovery) {
+      var np = h('input', { 'class': 'field', type: 'password', autocomplete: 'new-password', placeholder: '新しいパスワード（8文字以上）', 'aria-label': '新しいパスワード' }), pm = h('p', { 'class': 'authmsg', role: 'status' });
+      box.appendChild(h('div', { 'class': 'stack' }, h('b', null, '新しいパスワードを設定してください'), np, h('button', { 'class': 'btn', type: 'button', onclick: function () {
+        if (np.value.length < 8) { pm.textContent = 'パスワードは8文字以上にしてください。'; return; }
+        A.setPassword(np.value).then(function () { A.recovery = false; toast('パスワードを変更しました'); route(); }, function (e) { pm.textContent = authMsg(e); });
+      } }, '設定する'), pm));
+    }
+    box.appendChild(h('div', { 'class': 'frow' }, h('button', { 'class': 'btn ghost', type: 'button', onclick: function () {
+      My.flush().then(function () { return A.signOut(); }).then(function () { My.wipeLocal(); toast('ログアウトしました'); route(); });
+    } }, 'ログアウト')));
+    return box;
+  }
+  function dangerBox() {
+    var A = window.Acct;
+    return h('section', { 'class': 'block' }, h('h2', null, 'アカウントの削除'),
+      h('p', { 'class': 'sub' }, 'アカウントと、保存したマーク・用語帳・メモをすべて削除します。元に戻せません。必要なら、先に「書き出し」で保存してください。'),
+      h('button', { 'class': 'btn ghost', type: 'button', onclick: function () {
+        if (!confirm('アカウントとすべてのデータを削除します。元に戻せません。よろしいですか？')) return;
+        A.deleteAccount().then(function () { My.wipeLocal(); toast('削除しました'); route(); }, function (e) { toast(authMsg(e)); });
+      } }, 'アカウントを削除する'));
+  }
+
   function myPage() {
+    if (ACCT && !window.Acct.user()) return loginPage();
     var page = h('div', null, h('h2', { 'class': 'page-title' }, 'マイページ', h('small', null, 'マーク、用語帳、メモを、自分用にためる場所です')));
-    page.appendChild(h('p', { 'class': 'sub' }, '内容は、このブラウザの中にだけ保存されます（他の人には見えません）。ブラウザを変える・消すときは、下の「書き出し」で保存してください。'));
+    if (ACCT) page.appendChild(accountBox());
+    else page.appendChild(h('p', { 'class': 'sub' }, '内容は、このブラウザの中にだけ保存されます（他の人には見えません）。ブラウザを変える・消すときは、下の「書き出し」で保存してください。'));
     // --- marks
     var markSec = h('section', { 'class': 'block' }, h('h2', null, 'マーク'));
     var cur = 'star', list = h('div', { 'class': 'stack' });
@@ -1002,6 +1125,7 @@
           var a = h('a', { href: u, download: 'my-digest-' + ymd(new Date()) + '.json' }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
         } }, '書き出し（JSON）'),
         h('button', { 'class': 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '読み込み（上書き）'), file)));
+    if (ACCT) page.appendChild(dangerBox());
     return page;
   }
 
@@ -1022,5 +1146,5 @@
   }
   window.route = route;
   window.addEventListener('hashchange', route);
-  Store.init().then(route, route);
+  Promise.resolve(ACCT ? window.Acct.ready : null).then(function () { return ACCT ? My.syncDown() : null; }).then(function () { return Store.init(); }).then(route, route);
 })();

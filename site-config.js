@@ -1,1 +1,1 @@
-window.SITECFG = {"adsenseClient":"","adSlots":{"home":"","list":"","side":""},"analyticsToken":""};
+window.SITECFG = {"adsenseClient":"","adSlots":{"home":"","list":"","side":""},"analyticsToken":"","supabaseUrl":"","supabaseAnonKey":""};
