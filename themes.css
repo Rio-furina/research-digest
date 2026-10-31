@@ -46,7 +46,7 @@ html[data-theme=datadesk] .daterow { text-transform: none; font-variant-numeric:
 
 /* ---------- C. Quiet Docs: calm navy, soft elevation, pill tabs ---------- */
 html[data-theme=quietdocs] {
-  --bg: #f6f7f9; --surface: #ffffff; --ink: #0f1b2d; --muted: #556070; --line: #e3e7ee;
+  --bg: #ffffff; --surface: #ffffff; --ink: #0f1b2d; --muted: #556070; --line: #e3e7ee;
   --accent: #1f4f8f; --accent-ink: #ffffff; --soft: #eaf1fa;
   --l1: #146c43; --l1b: #e3f3ea; --l2: #1d4ed8; --l2b: #e7eefd; --l3: #6b3fa0; --l3b: #f0e9f8;
 }

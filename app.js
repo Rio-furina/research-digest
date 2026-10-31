@@ -428,7 +428,6 @@
     var set = curWeek();
     var nreads = set ? set.topics.reduce(function (s, t) { return s + (t.reads || []).length; }, 0) : 0;
     var blk = h('section', { 'class': 'block' }, h('h2', null, '今週の出来事', h('small', null, set ? fmtDate(set.date) + '　読む記事は ' + nreads + '本' : '')));
-    blk.appendChild(h('p', { 'class': 'lead' }, '最近の出来事から入り、それを理解できる記事を読みます。各記事には、関連する事例・歴史の説明と、ノート欄が付いています。'));
     if (set && set.topics.length) {
       var stack = h('div', { 'class': 'stack' }); set.topics.forEach(function (t) { stack.appendChild(eventCard(t)); }); blk.appendChild(stack);
     } else blk.appendChild(h('p', { 'class': 'empty' }, '出来事はまだありません。定期タスクの実行後に表示されます。'));

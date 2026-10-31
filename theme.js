@@ -1,6 +1,6 @@
 // Theme switcher (loaded in <head> so the saved theme applies before first paint).
 (function () {
-  var THEMES = [['', '現在'], ['broadsheet', 'A 新聞'], ['datadesk', 'B データ'], ['quietdocs', 'C 静か']];
+  var THEMES = [['', '現在'], ['datadesk', 'B データ'], ['quietdocs', 'C 静か'], ['front', 'D 一面'], ['margin', 'E 余白'], ['ledger', 'F 索引']];
   var de = document.documentElement, KEY = 'digest.theme';
   function get() { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
   function set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
@@ -16,3 +16,9 @@
     bar.appendChild(sel);
   });
 })();
+// A card opens and closes on click (outside links and buttons); the new themes hide secondary text until it is open.
+document.addEventListener('click', function (ev) {
+  if (ev.target.closest('a, button, summary, input, select, textarea, label')) return;
+  var c = ev.target.closest('.card'); if (!c || c.classList.contains('tpbox') || c.closest('.filters')) return;
+  c.classList.toggle('open');
+});
