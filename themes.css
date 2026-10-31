@@ -1,0 +1,66 @@
+/* Design candidates. Each theme only overrides variables plus a few structural rules. Chosen with the selector in the top bar. */
+.themesel { margin-left: auto; margin-bottom: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 2px 6px; font-size: 13px; color: var(--muted); }
+html[data-theme] body { line-break: strict; }
+html[data-theme] h1, html[data-theme] h2, html[data-theme] h3 { text-wrap: pretty; }
+
+/* ---------- A. Broadsheet: paper tone, serif headlines, ruled items ---------- */
+html[data-theme=broadsheet] {
+  --bg: #f7f3ec; --surface: #fffdf9; --ink: #1d1a16; --muted: #5e574d; --line: #e0d8ca;
+  --accent: #9b1c3a; --accent-ink: #ffffff; --soft: #f4e7e4;
+  --l1: #2f6b3a; --l1b: #e6efe2; --l2: #1f5582; --l2b: #e3ecf4; --l3: #6a3d7a; --l3b: #efe6f1;
+  --serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "BIZ UDPMincho", serif;
+}
+@media (prefers-color-scheme: dark) { html[data-theme=broadsheet] {
+  --bg: #1a1714; --surface: #221e1a; --ink: #ece6dc; --muted: #a89f92; --line: #3a332c;
+  --accent: #f09aa8; --accent-ink: #1a1714; --soft: #33231f;
+  --l1: #8fd19a; --l1b: #1b2a1d; --l2: #8cbbe4; --l2b: #172636; --l3: #d3a9e0; --l3b: #2a1d30;
+} }
+html[data-theme=broadsheet] body { font-size: 16.5px; line-height: 1.85; }
+html[data-theme=broadsheet] .top { border-bottom: 3px solid var(--ink); }
+html[data-theme=broadsheet] .brand, html[data-theme=broadsheet] h1, html[data-theme=broadsheet] h2, html[data-theme=broadsheet] h3, html[data-theme=broadsheet] .ev-title { font-family: var(--serif); font-weight: 700; }
+html[data-theme=broadsheet] .card { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; padding: 14px 2px; }
+html[data-theme=broadsheet] .card.event { padding: 12px 2px; }
+html[data-theme=broadsheet] .read, html[data-theme=broadsheet] .sidebox { border-radius: 2px; }
+html[data-theme=broadsheet] .daterow { font-size: 13px; letter-spacing: .08em; border-bottom: 0; border-top: 2px solid var(--ink); padding-top: 6px; }
+html[data-theme=broadsheet] #tabs a { font-family: var(--serif); }
+
+/* ---------- B. Data Desk: white, dense, tabular, underline tabs ---------- */
+html[data-theme=datadesk] {
+  --bg: #ffffff; --surface: #ffffff; --ink: #111827; --muted: #4b5563; --line: #e5e7eb;
+  --accent: #1d4ed8; --accent-ink: #ffffff; --soft: #eff4ff;
+  --l1: #146c43; --l1b: #e3f3ea; --l2: #1d4ed8; --l2b: #e7eefd; --l3: #6b3fa0; --l3b: #f0e9f8;
+  --font: "BIZ UDPGothic", "Yu Gothic UI", "Hiragino Sans", "Meiryo", sans-serif;
+}
+@media (prefers-color-scheme: dark) { html[data-theme=datadesk] {
+  --bg: #0b0e14; --surface: #121722; --ink: #e6e9ef; --muted: #9aa4b2; --line: #232a36;
+  --accent: #7aa2ff; --accent-ink: #0b0e14; --soft: #172036;
+  --l1: #6fd3a0; --l1b: #11291d; --l2: #93b4ff; --l2b: #17223b; --l3: #c9a6f5; --l3b: #261b3a;
+} }
+html[data-theme=datadesk] body { font-size: 15.5px; line-height: 1.75; font-variant-numeric: tabular-nums; border-top: 4px solid #e3120b; }
+html[data-theme=datadesk] .card { border-radius: 4px; padding: 10px 14px; box-shadow: none; }
+html[data-theme=datadesk] .card h3 { font-size: 16px; }
+html[data-theme=datadesk] .sidebox { border-radius: 4px; }
+html[data-theme=datadesk] .layout { grid-template-columns: minmax(0, 1fr) 272px; }
+html[data-theme=datadesk] #tabs a { border-bottom-width: 2px; }
+html[data-theme=datadesk] .daterow { text-transform: none; font-variant-numeric: tabular-nums; }
+
+/* ---------- C. Quiet Docs: calm navy, soft elevation, pill tabs ---------- */
+html[data-theme=quietdocs] {
+  --bg: #f6f7f9; --surface: #ffffff; --ink: #0f1b2d; --muted: #556070; --line: #e3e7ee;
+  --accent: #1f4f8f; --accent-ink: #ffffff; --soft: #eaf1fa;
+  --l1: #146c43; --l1b: #e3f3ea; --l2: #1d4ed8; --l2b: #e7eefd; --l3: #6b3fa0; --l3b: #f0e9f8;
+}
+@media (prefers-color-scheme: dark) { html[data-theme=quietdocs] {
+  --bg: #0e1420; --surface: #151d2b; --ink: #e7ecf3; --muted: #98a3b3; --line: #263042;
+  --accent: #8fb6ff; --accent-ink: #0e1420; --soft: #1a2740;
+  --l1: #6fd3a0; --l1b: #11291d; --l2: #93b4ff; --l2b: #17223b; --l3: #c9a6f5; --l3b: #261b3a;
+} }
+html[data-theme=quietdocs] body { line-height: 1.85; }
+html[data-theme=quietdocs] .card { border: 0; border-radius: 12px; padding: 16px 20px; box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(15, 27, 45, .06); }
+html[data-theme=quietdocs] .card.event { padding: 12px 18px; }
+html[data-theme=quietdocs] .sidebox { border: 0; border-radius: 12px; box-shadow: 0 0 0 1px var(--line); }
+html[data-theme=quietdocs] .sidebox h3 { font-size: 12.5px; color: var(--muted); letter-spacing: .06em; }
+html[data-theme=quietdocs] #tabs { background: var(--soft); border-radius: 999px; padding: 3px; gap: 2px; margin-bottom: 8px; }
+html[data-theme=quietdocs] #tabs a { border-bottom: 0; border-radius: 999px; padding: 6px 14px; }
+html[data-theme=quietdocs] #tabs a[aria-current="page"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+html[data-theme=quietdocs] .brand { padding-bottom: 8px; }
