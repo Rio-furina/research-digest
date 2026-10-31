@@ -312,7 +312,7 @@
         a.raw ? null : levelBadge(a.level), langBadge(a), h('span', { 'class': 'src' }, a.src), a.date ? h('time', null, a.date) : null,
         a.partial ? h('span', { 'class': 'badge warn' }, '概要のみ') : null, readCheck(a.id)),
       h('h4', null, link(a.url, a.title)),
-      r.why ? h('p', { 'class': 'why2' }, h('b', null, 'なぜこの記事か　'), r.why) : null,
+      r.why ? h('p', { 'class': 'why2' }, h('em', { 'class': 'why-l' }, '選んだ理由'), r.why) : null,
       moreBlock(r, a),
       originLine(a));
   }
@@ -338,7 +338,7 @@
       rank ? h('span', { 'class': 'rank' }, p2(rank)) : null,
       h('div', { 'class': 'meta' }, h('span', { 'class': 'badge cat' }, catName[t.cat] || t.cat), t.media && t.media.length ? h('span', { 'class': 'heat' }, t.heat + '媒体が報道') : h('span', { 'class': 'heat' }, 'レポートから作成（AI）')),
       h('h3', { 'class': 'ev-title' }, t.title),
-      why ? h('p', { 'class': 'why1' }, h('span', { 'class': 'why1-t' }, '読む'), link(wa.url, wa.title), why.why ? h('span', { 'class': 'why1-w' }, why.why) : null) : null,
+      why ? h('p', { 'class': 'why1' }, h('span', { 'class': 'why1-t' }, '読む'), link(wa.url, wa.title), why.why ? h('span', { 'class': 'why1-w' }, h('em', { 'class': 'why-l' }, '選んだ理由'), why.why) : null) : null,
       h('div', { 'class': 'detail' },
         h('p', { 'class': 'sum' }, t.blurb),
         t.media && t.media.length ? h('details', { 'class': 'inline' }, h('summary', null, '報道を見る（' + t.media.length + '件）'), h('ul', { 'class': 'media' }, t.media.map(mediaRow))) : null,
