@@ -129,3 +129,23 @@ html[data-theme=pop] .hs-chips .tag { border-radius: 999px; background: var(--so
 html[data-theme=pop] .hs-group { margin-top: 24px; }
 html[data-theme=pop] .hs-group > h3 { font: 800 17px var(--round); display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
 html[data-theme=pop] .hs-group .stack { grid-template-columns: 1fr; gap: 8px; }
+
+/* marks, glossary, my page */
+.markbar { display: inline-flex; gap: 2px; margin-left: auto; }
+.mk { border: 0; background: transparent; color: var(--muted); font-size: 15px; line-height: 1; padding: 3px 5px; border-radius: 6px; cursor: pointer; }
+.mk:hover { background: var(--soft); }
+.mk[aria-pressed="true"] { color: var(--accent); background: var(--soft); font-weight: 800; }
+.markbar:not(.has) .mk:not(:hover) { opacity: .45; }
+html[data-theme=pop] .card:not(.open):not(:hover) .markbar:not(.has) { visibility: hidden; }
+html[data-theme=pop] .card.term:not(.open) .detail { display: none; }
+html[data-theme=pop] .card.term { padding: 14px 18px; }
+html[data-theme=pop] .card.term h3 { font-size: 17px; margin: 4px 0 2px; }
+html[data-theme=pop] .card.term .meta { align-items: center; }
+html[data-theme=pop] .tip { background: var(--soft); border-radius: 10px; padding: 8px 12px; margin: 10px 0; font-size: 14px; }
+html[data-theme=pop] .bk { max-width: 230px; }
+html[data-theme=pop] .chip.on, html[data-theme=pop] .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+html[data-theme=pop] .chk1 { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+html[data-theme=pop] .bk-term { padding: 10px 0; border-top: 1px dashed var(--line); display: grid; gap: 4px; }
+html[data-theme=pop] .bk-term textarea, html[data-theme=pop] .memo textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
+html[data-theme=pop] .memo { cursor: default; display: grid; gap: 8px; }
+html[data-theme=pop] .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 20; box-shadow: 0 4px 16px rgb(0 0 0 / .25); }

@@ -3,7 +3,7 @@
   var D = window.DIGEST;
   var app = document.getElementById('app');
   var PUBLIC = !!(D && D.public);   // public build: read-only (no notes, no AI, no local API)
-  var TABS = [['home', 'ホーム'], ['events', '出来事'], ['articles', '記事'], ['reports', 'レポート'], ['notes', 'ノート'], ['about', '使い方']]
+  var TABS = [['home', 'ホーム'], ['events', '出来事'], ['articles', '記事'], ['reports', 'レポート'], ['gloss', '用語集'], ['my', 'マイページ'], ['notes', 'ノート'], ['about', '使い方']]
     .filter(function (t) { return !(PUBLIC && t[0] === 'notes'); });
   var WD = ['日', '月', '火', '水', '木', '金', '土'];
 
@@ -286,6 +286,7 @@
       a.raw ? h('span', { 'class': 'badge scope', title: '見出しから自動で判定した分野です' }, catName[a.cat] || a.cat) : null,
       a.partial ? h('span', { 'class': 'badge warn', title: '本文を読めず、概要だけから要約しています' }, '概要のみ') : null,
       a.added === D.latest ? h('span', { 'class': 'badge new' }, 'NEW') : null);
+    meta.appendChild(markBar('a:' + a.id));
     var kids = [meta, h('h3', null, link(a.url, a.title))];
     if (a.raw) kids.push(h('p', { 'class': 'sub' }, '要約なし（見出しだけ収集）'));
     else {
@@ -386,9 +387,7 @@
   }
   var sideEl = document.getElementById('side'), glossEl = null;
   function buildGlossary() {
-    var map = {};
-    D.articles.forEach(function (a) { (a.terms || []).forEach(function (t) { if (t.t && !map[t.t]) map[t.t] = { t: t.t, d: t.d, n: 0 }; if (map[t.t]) map[t.t].n++; }); });
-    var arr = Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return b.n - a.n || (a.t < b.t ? -1 : 1); });
+    var arr = glossAll().slice().sort(function (a, b) { return b.n - a.n || (a.t < b.t ? -1 : 1); });
     var q = h('input', { 'class': 'field', type: 'search', placeholder: '用語を検索（' + arr.length + '語）', 'aria-label': '用語検索' });
     var out = h('ul', { 'class': 'gloss' });
     function paint() {
@@ -396,10 +395,10 @@
       var s = q.value.trim().toLowerCase();
       var list = arr.filter(function (x) { return !s || x.t.toLowerCase().indexOf(s) >= 0 || (x.d || '').toLowerCase().indexOf(s) >= 0; }).slice(0, 8);
       if (!list.length) out.appendChild(h('li', { 'class': 'sub' }, '見つかりません'));
-      list.forEach(function (x) { out.appendChild(h('li', null, h('button', { 'class': 'tag', type: 'button', onclick: function () { goSearch(x.t); } }, x.t), h('div', { 'class': 'sub' }, x.d))); });
+      list.forEach(function (x) { out.appendChild(h('li', null, h('button', { 'class': 'tag', type: 'button', onclick: function () { openGloss(x.t); } }, x.t), h('div', { 'class': 'sub' }, x.d))); });
     }
     q.addEventListener('input', paint); paint();
-    return h('section', { 'class': 'sidebox' }, h('h3', null, '用語集'), q, out, h('p', { 'class': 'sub' }, '用語を押すと、その言葉で記事を検索します。'));
+    return h('section', { 'class': 'sidebox' }, h('h3', null, '用語集', h('a', { href: '#gloss', 'class': 'cnt' }, 'すべて見る →')), q, out, h('p', { 'class': 'sub' }, '用語を押すと、用語集で詳しく見られます。'));
   }
   function renderSide() {
     if (!sideEl) return;
@@ -776,7 +775,206 @@
     return page;
   }
 
-  var pages = { home: home, events: eventsPage, articles: function () { return libraryPage('article'); }, reports: function () { return libraryPage('report'); }, notes: notesPage, about: aboutPage };
+  // ---------------------------------------------------------------- glossary, marks, word books, my page
+  // Everything personal lives in this browser only (works on the public site too). Backup = export / import.
+  var FLAGS = [['star', '★', 'お気に入り'], ['later', '⚑', 'あとで'], ['unsure', '？', 'わからない'], ['done', '✓', '理解した']];
+  var My = (function () {
+    var d = {};
+    try { d = JSON.parse(lsGet('my') || '{}') || {}; } catch (e) { d = {}; }
+    d.marks = d.marks || {}; d.books = d.books || []; d.memos = d.memos || [];
+    return {
+      d: d,
+      save: function () { lsSet('my', JSON.stringify(d)); },
+      replace: function (n) { d.marks = n.marks || {}; d.books = n.books || []; d.memos = n.memos || []; this.save(); },
+      uid: function () { return 'x' + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36); }
+    };
+  })();
+  function markBar(key) {
+    var cur = My.d.marks[key] || [];
+    var bar = h('span', { 'class': 'markbar' + (cur.length ? ' has' : '') });
+    FLAGS.forEach(function (f) {
+      var b = h('button', { 'class': 'mk', type: 'button', title: f[2], 'aria-label': f[2], 'aria-pressed': cur.indexOf(f[0]) >= 0 ? 'true' : 'false', 'data-f': f[0] }, f[1]);
+      b.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var list = My.d.marks[key] || [], i = list.indexOf(f[0]);
+        if (i >= 0) list.splice(i, 1); else list.push(f[0]);
+        if (list.length) My.d.marks[key] = list; else delete My.d.marks[key];
+        My.save(); b.setAttribute('aria-pressed', i >= 0 ? 'false' : 'true'); bar.className = 'markbar' + (list.length ? ' has' : '');
+      });
+      bar.appendChild(b);
+    });
+    return bar;
+  }
+  var glossCache = null;
+  function glossAll() {
+    if (glossCache) return glossCache;
+    var map = {}, out = [];
+    (D.glossary || []).forEach(function (g) { if (g && g.t && !map[g.t]) { map[g.t] = { t: g.t, d: g.d, ex: g.ex || '', cat: g.cat || '', alias: g.alias || [], n: 0 }; out.push(map[g.t]); } });
+    D.articles.forEach(function (a) { (a.terms || []).forEach(function (t) {
+      if (!t.t) return;
+      if (!map[t.t]) { map[t.t] = { t: t.t, d: t.d, ex: '', cat: '記事から', alias: [], n: 0 }; out.push(map[t.t]); }
+      map[t.t].n++;
+    }); });
+    out.sort(function (a, b) { return a.t.replace(/[（(].*$/, '').localeCompare(b.t.replace(/[（(].*$/, ''), 'ja'); });
+    glossCache = out; return out;
+  }
+  var gst = { q: '', cat: 'all', mark: false, limit: 60 };
+  function addToBook(term, sel) {
+    var v = sel.value; if (!v) return;
+    var b;
+    if (v === '__new') { var nm = prompt('新しい用語帳の名前'); if (!nm || !nm.trim()) { sel.value = ''; return; } b = { id: My.uid(), name: nm.trim().slice(0, 40), terms: [] }; My.d.books.push(b); }
+    else b = My.d.books.filter(function (x) { return x.id === v; })[0];
+    if (b && !b.terms.some(function (x) { return x.t === term.t; })) b.terms.push({ t: term.t, d: term.d || '', memo: '' });
+    My.save(); toast((b ? '「' + b.name + '」に追加しました' : ''));
+    renderGlossFresh(sel);
+  }
+  function renderGlossFresh(sel) { var c = sel.closest('.card'); if (c) { var n = termCard(c.__term); c.parentNode.replaceChild(n, c); n.classList.add('open'); } }
+  function toast(msg) {
+    var t = h('div', { 'class': 'toast', role: 'status' }, msg); document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 2200);
+  }
+  function termCard(g) {
+    var sel = h('select', { 'class': 'field bk', 'aria-label': '用語帳に追加' }, h('option', { value: '' }, '＋ 用語帳に追加…'));
+    My.d.books.forEach(function (b) { sel.appendChild(h('option', { value: b.id }, b.name + (b.terms.some(function (x) { return x.t === g.t; }) ? '（追加済み）' : ''))); });
+    sel.appendChild(h('option', { value: '__new' }, '新しい用語帳を作る…'));
+    sel.addEventListener('change', function () { addToBook(g, sel); });
+    sel.addEventListener('click', function (e) { e.stopPropagation(); });
+    var c = h('article', { 'class': 'card term' },
+      h('div', { 'class': 'meta' }, h('span', { 'class': 'badge cat' }, g.cat || '用語'), g.n ? h('span', { 'class': 'sub' }, '記事に ' + g.n + '回') : null, markBar('t:' + g.t)),
+      h('h3', null, g.t), h('p', { 'class': 'sum' }, g.d || ''),
+      h('div', { 'class': 'detail' },
+        g.ex ? h('p', { 'class': 'tip' }, h('b', null, '例・ヒント　'), g.ex) : null,
+        g.alias && g.alias.length ? h('p', { 'class': 'sub' }, '別の呼び方：' + g.alias.join('、')) : null,
+        h('div', { 'class': 'frow' }, sel, h('button', { 'class': 'btn ghost', type: 'button', onclick: function (e) { e.stopPropagation(); goSearch(g.t); } }, 'この言葉で記事を探す'))));
+    c.__term = g; return c;
+  }
+  function glossaryPage() {
+    var all = glossAll(), cats = [];
+    all.forEach(function (g) { if (g.cat && cats.indexOf(g.cat) < 0) cats.push(g.cat); });
+    var page = h('div', null, h('h2', { 'class': 'page-title' }, '用語集', h('small', null, '経済・金融・政策の言葉と、読み方のヒント。★や用語帳で、自分用にまとめられます')));
+    var q = h('input', { 'class': 'field', type: 'search', placeholder: '用語を検索（' + all.length + '語）', value: gst.q, 'aria-label': '用語検索' });
+    var cs = h('select', { 'class': 'field', 'aria-label': '分野' }, [h('option', { value: 'all' }, 'すべての分野')].concat(cats.map(function (c) { return h('option', { value: c }, c); })));
+    cs.value = gst.cat;
+    var mk = h('label', { 'class': 'chk1' }, h('input', { type: 'checkbox' }), 'マークをつけたものだけ'); mk.firstChild.checked = gst.mark;
+    var out = h('div', { 'class': 'stack' }), cnt = h('p', { 'class': 'count' });
+    function paint() {
+      out.textContent = '';
+      var s = gst.q.trim().toLowerCase();
+      var list = all.filter(function (g) {
+        if (gst.cat !== 'all' && g.cat !== gst.cat) return false;
+        if (gst.mark && !(My.d.marks['t:' + g.t] || []).length) return false;
+        if (!s) return true;
+        return (g.t + ' ' + (g.d || '') + ' ' + (g.alias || []).join(' ')).toLowerCase().indexOf(s) >= 0;
+      });
+      cnt.textContent = list.length + '語';
+      list.slice(0, gst.limit).forEach(function (g) { out.appendChild(termCard(g)); });
+      if (list.length > gst.limit) out.appendChild(h('button', { 'class': 'more-btn', type: 'button', onclick: function () { gst.limit += 60; paint(); } }, 'もっと見る'));
+      if (!list.length) out.appendChild(h('p', { 'class': 'empty' }, '見つかりません。'));
+    }
+    q.addEventListener('input', function () { gst.q = q.value; gst.limit = 60; paint(); });
+    cs.addEventListener('change', function () { gst.cat = cs.value; gst.limit = 60; paint(); });
+    mk.firstChild.addEventListener('change', function () { gst.mark = mk.firstChild.checked; gst.limit = 60; paint(); });
+    page.appendChild(h('div', { 'class': 'filters' }, h('div', { 'class': 'frow' }, q, cs, mk)));
+    page.appendChild(cnt); page.appendChild(out); paint();
+    return page;
+  }
+  function openGloss(t) { gst.q = t; gst.cat = 'all'; gst.mark = false; gst.limit = 60; if (location.hash === '#gloss') route(); else location.hash = '#gloss'; }
+
+  function myPage() {
+    var page = h('div', null, h('h2', { 'class': 'page-title' }, 'マイページ', h('small', null, 'マーク、用語帳、メモを、自分用にためる場所です')));
+    page.appendChild(h('p', { 'class': 'sub' }, '内容は、このブラウザの中にだけ保存されます（他の人には見えません）。ブラウザを変える・消すときは、下の「書き出し」で保存してください。'));
+    // --- marks
+    var markSec = h('section', { 'class': 'block' }, h('h2', null, 'マーク'));
+    var cur = 'star', list = h('div', { 'class': 'stack' });
+    var chips = h('div', { 'class': 'frow' });
+    function paintMarks() {
+      chips.textContent = ''; list.textContent = '';
+      FLAGS.forEach(function (f) {
+        var n = Object.keys(My.d.marks).filter(function (k) { return (My.d.marks[k] || []).indexOf(f[0]) >= 0; }).length;
+        chips.appendChild(h('button', { 'class': 'chip' + (cur === f[0] ? ' on' : ''), type: 'button', 'aria-pressed': cur === f[0] ? 'true' : 'false', onclick: function () { cur = f[0]; paintMarks(); } }, f[1] + ' ' + f[2] + '（' + n + '）'));
+      });
+      var keys = Object.keys(My.d.marks).filter(function (k) { return (My.d.marks[k] || []).indexOf(cur) >= 0; });
+      keys.forEach(function (k) {
+        if (k.indexOf('a:') === 0) { var a = byId[k.slice(2)]; if (a) list.appendChild(articleCard(a, false)); }
+        else if (k.indexOf('t:') === 0) { var g = glossAll().filter(function (x) { return x.t === k.slice(2); })[0]; if (g) list.appendChild(termCard(g)); }
+      });
+      if (!keys.length) list.appendChild(h('p', { 'class': 'empty' }, 'まだありません。記事や用語のカードにある ★ ⚑ ？ ✓ を押すと、ここに集まります。'));
+    }
+    markSec.appendChild(chips); markSec.appendChild(list); page.appendChild(markSec); paintMarks();
+    // --- word books
+    var bookSec = h('section', { 'class': 'block' }, h('h2', null, '用語帳'));
+    var books = h('div', { 'class': 'stack' });
+    var nameIn = h('input', { 'class': 'field', type: 'text', placeholder: '用語帳の名前（例：金融政策、試験対策）', 'aria-label': '用語帳の名前' });
+    function paintBooks() {
+      books.textContent = '';
+      My.d.books.forEach(function (b) {
+        var bt = h('div', { 'class': 'bk-terms' });
+        function paintTerms() {
+          bt.textContent = '';
+          b.terms.forEach(function (x, i) {
+            var memo = h('textarea', { rows: 2, placeholder: '自分のメモ（覚え方、例、疑問）', 'aria-label': 'メモ' }); memo.value = x.memo || '';
+            memo.addEventListener('input', function () { x.memo = memo.value; My.save(); });
+            bt.appendChild(h('div', { 'class': 'bk-term' }, h('b', null, x.t), x.own ? h('span', { 'class': 'badge scope' }, '自作') : null,
+              h('p', { 'class': 'sub' }, x.d || ''), memo,
+              h('button', { 'class': 'tag', type: 'button', onclick: function () { b.terms.splice(i, 1); My.save(); paintTerms(); } }, '外す')));
+          });
+          if (!b.terms.length) bt.appendChild(h('p', { 'class': 'sub' }, '空です。用語集の「＋用語帳に追加」か、下の自作フォームから追加できます。'));
+        }
+        paintTerms();
+        var nt = h('input', { 'class': 'field', type: 'text', placeholder: '自作の用語', 'aria-label': '用語' }), nd = h('input', { 'class': 'field', type: 'text', placeholder: '意味・説明', 'aria-label': '説明' });
+        var det = h('details', { 'class': 'card inline-card', open: true }, h('summary', null, b.name + '（' + b.terms.length + '語）'), bt,
+          h('div', { 'class': 'frow' }, nt, nd, h('button', { 'class': 'btn ghost', type: 'button', onclick: function () {
+            if (!nt.value.trim()) return; b.terms.push({ t: nt.value.trim(), d: nd.value.trim(), memo: '', own: true }); My.save(); paintBooks();
+          } }, '自作の用語を追加')),
+          h('div', { 'class': 'frow' },
+            h('button', { 'class': 'tag', type: 'button', onclick: function () { var nm = prompt('用語帳の名前を変更', b.name); if (nm && nm.trim()) { b.name = nm.trim().slice(0, 40); My.save(); paintBooks(); } } }, '名前を変える'),
+            h('button', { 'class': 'tag', type: 'button', onclick: function () { if (confirm('「' + b.name + '」を削除しますか？')) { My.d.books = My.d.books.filter(function (x) { return x !== b; }); My.save(); paintBooks(); } } }, 'この用語帳を削除')));
+        books.appendChild(det);
+      });
+      if (!My.d.books.length) books.appendChild(h('p', { 'class': 'empty' }, 'まだありません。名前を入れて作ってください。'));
+    }
+    bookSec.appendChild(h('div', { 'class': 'frow' }, nameIn, h('button', { 'class': 'btn', type: 'button', onclick: function () {
+      if (!nameIn.value.trim()) return; My.d.books.push({ id: My.uid(), name: nameIn.value.trim().slice(0, 40), terms: [] }); My.save(); nameIn.value = ''; paintBooks();
+    } }, '用語帳を作る')));
+    bookSec.appendChild(books); page.appendChild(bookSec); paintBooks();
+    // --- quick memos
+    var memoSec = h('section', { 'class': 'block' }, h('h2', null, 'メモ'));
+    var memos = h('div', { 'class': 'stack' });
+    function paintMemos() {
+      memos.textContent = '';
+      My.d.memos.slice().sort(function (a, b) { return (b.updated || '') < (a.updated || '') ? -1 : 1; }).forEach(function (m) {
+        var title = h('input', { 'class': 'field', type: 'text', placeholder: '題', value: m.title || '', 'aria-label': '題' });
+        var body = h('textarea', { rows: 4, placeholder: '学んだこと、疑問、考えたこと', 'aria-label': '本文' }); body.value = m.body || '';
+        function upd() { m.title = title.value; m.body = body.value; m.updated = new Date().toISOString(); My.save(); }
+        title.addEventListener('input', upd); body.addEventListener('input', upd);
+        memos.appendChild(h('div', { 'class': 'card memo' }, title, body, h('div', { 'class': 'frow' }, h('span', { 'class': 'sub' }, m.updated ? fmtTime(m.updated) : ''),
+          h('button', { 'class': 'tag', type: 'button', onclick: function () { if (confirm('このメモを削除しますか？')) { My.d.memos = My.d.memos.filter(function (x) { return x !== m; }); My.save(); paintMemos(); } } }, '削除'))));
+      });
+      if (!My.d.memos.length) memos.appendChild(h('p', { 'class': 'empty' }, 'まだありません。'));
+    }
+    memoSec.appendChild(h('div', { 'class': 'frow' }, h('button', { 'class': 'btn', type: 'button', onclick: function () {
+      My.d.memos.push({ id: My.uid(), title: '', body: '', updated: new Date().toISOString() }); My.save(); paintMemos();
+    } }, '＋ メモを書く'), PUBLIC ? null : h('a', { href: '#notes' }, '記事ごとのノート・AI学習は「ノート」タブ →')));
+    memoSec.appendChild(memos); page.appendChild(memoSec); paintMemos();
+    // --- backup
+    var file = h('input', { type: 'file', accept: 'application/json,.json', 'class': 'offscreen', 'aria-label': '読み込むファイル' });
+    file.addEventListener('change', function () {
+      var f = file.files && file.files[0]; if (!f) return;
+      var r = new FileReader();
+      r.onload = function () { try { var n = JSON.parse(r.result); if (typeof n !== 'object' || !n) throw new Error('bad'); My.replace(n); toast('読み込みました'); route(); } catch (e) { toast('読み込めませんでした'); } };
+      r.readAsText(f);
+    });
+    page.appendChild(h('section', { 'class': 'block' }, h('h2', null, 'バックアップ'),
+      h('div', { 'class': 'frow' },
+        h('button', { 'class': 'btn ghost', type: 'button', onclick: function () {
+          var blob = new Blob([JSON.stringify(My.d, null, 2)], { type: 'application/json' }), u = URL.createObjectURL(blob);
+          var a = h('a', { href: u, download: 'my-digest-' + ymd(new Date()) + '.json' }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+        } }, '書き出し（JSON）'),
+        h('button', { 'class': 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '読み込み（上書き）'), file)));
+    return page;
+  }
+
+  var pages = { home: home, events: eventsPage, articles: function () { return libraryPage('article'); }, reports: function () { return libraryPage('report'); }, gloss: glossaryPage, my: myPage, notes: notesPage, about: aboutPage };
   function route() {
     var t = (location.hash || '#home').slice(1);
     if (!pages[t] || (PUBLIC && t === 'notes')) t = 'home';
