@@ -491,6 +491,7 @@
     if (!PUBLIC) page.appendChild(h('section', { 'class': 'block' }, h('h2', null, 'ノート'),
       h('p', { 'class': 'lead' }, tc ? '「もっと調べたいこと」が ' + tc + '件あります。' : 'ノートに「わからないところ」「学んだこと」「調べたいこと」を書くと、ここに集まります。', ' ', h('a', { href: '#notes' }, 'ノートを開く →'))));
     page.appendChild(h('p', { 'class': 'origin' }, h('a', { href: '#articles' }, '記事の一覧 →'), '　', h('a', { href: '#reports' }, 'レポートの一覧 →')));
+    if (window.Ads) { var adH = window.Ads.slot('home'); if (adH) page.appendChild(adH); }
     return page;
   }
 
@@ -636,6 +637,7 @@
       viewToggle(paint)));
     page.appendChild(f); page.appendChild(tpBox); page.appendChild(results);
     paint();
+    if (window.Ads) { var adL = window.Ads.slot('list'); if (adL) page.appendChild(adL); }
     return page;
   }
 
@@ -1011,7 +1013,14 @@
     TABS.forEach(function (x) { nav.appendChild(h('a', { href: '#' + x[0], 'aria-current': x[0] === t ? 'page' : null }, x[1])); });
     app.textContent = ''; app.appendChild(pages[t]()); renderSide(); window.scrollTo(0, 0);
   }
-  document.getElementById('foot').textContent = '要約・レベル・歴史の補足はAIが作成しています。正確な内容は必ず原文でご確認ください。各レポートの著作権は各機関にあります。このサイトは見出し・要約・リンクのみを掲載しています。　更新: ' + D.generated;
+  var foot = document.getElementById('foot');
+  foot.textContent = '要約・レベル・歴史の補足はAIが作成しています。正確な内容は必ず原文でご確認ください。各レポートの著作権は各機関にあります。このサイトは見出し・要約・リンクのみを掲載しています。　更新: ' + D.generated;
+  if (PUBLIC) {
+    var lk = h('div', { 'class': 'lnks' }, h('a', { href: 'privacy.html' }, 'プライバシーポリシー'), h('a', { href: 'terms.html' }, '利用規約・免責'), h('a', { href: 'contact.html' }, '運営者情報・お問い合わせ'));
+    if (window.SITECFG && window.SITECFG.adsenseClient) lk.appendChild(h('a', { href: '#', onclick: function (e) { e.preventDefault(); if (window.openConsent) window.openConsent(); } }, 'Cookie設定'));
+    foot.appendChild(lk);
+  }
+  window.route = route;
   window.addEventListener('hashchange', route);
   Store.init().then(route, route);
 })();

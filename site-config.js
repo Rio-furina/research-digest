@@ -1,0 +1,1 @@
+window.SITECFG = {"adsenseClient":"","adSlots":{"home":"","list":"","side":""},"analyticsToken":""};

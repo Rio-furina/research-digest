@@ -149,3 +149,13 @@ html[data-theme=pop] .bk-term { padding: 10px 0; border-top: 1px dashed var(--li
 html[data-theme=pop] .bk-term textarea, html[data-theme=pop] .memo textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--surface); }
 html[data-theme=pop] .memo { cursor: default; display: grid; gap: 8px; }
 html[data-theme=pop] .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 20; box-shadow: 0 4px 16px rgb(0 0 0 / .25); }
+
+/* ---- consent banner, ads, footer links ---- */
+#consent { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 50; max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid #dfe3f0; border-radius: 16px; padding: 14px 16px; box-shadow: 0 8px 28px rgba(40,50,120,.18); font-size: 13px; line-height: 1.6; }
+#consent p { margin: 0 0 10px; }
+#consent .row { display: flex; gap: 8px; justify-content: flex-end; }
+.adbox { margin: 18px 0; text-align: center; min-height: 90px; }
+.adbox small { display: block; font-size: 10px; color: #8a90a8; text-align: left; margin-bottom: 2px; }
+.foot a { color: inherit; text-decoration: underline; margin-right: 10px; }
+.foot .lnks { margin-top: 6px; }
+main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
