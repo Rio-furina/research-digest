@@ -293,7 +293,7 @@
       kids.push(h('details', { 'class': 'more', open: open }, h('summary', null, '要約・関連を見る'), summaryDetail(a)));
     }
     kids.push(noteToggle(a), originLine(a));
-    return h('article', { 'class': 'card' + (a.raw ? ' rawcard' : '') }, kids);
+    return h('article', { 'class': 'card cat-' + a.cat + (a.raw ? ' rawcard' : '') }, kids);
   }
 
   function learnBox(r) {
@@ -328,15 +328,21 @@
     return d;
   }
   function mediaRow(m) { return h('li', null, link(m.url, m.title), h('span', { 'class': 'sub' }, '　' + m.name)); }
-  function eventCard(t) {
+  // rank = 1 for the most important event of the week (events are stored most important first)
+  function eventCard(t, rank) {
     var reads = (t.reads || []).map(readBlock).filter(Boolean);
-    return h('article', { 'class': 'card event' },
+    var why = (t.reads || []).filter(function (r) { return byId[r.id]; })[0], wa = why ? byId[why.id] : null;
+    var cls = 'card event cat-' + t.cat + (rank && rank <= 3 ? ' top3' : '') + (rank === 1 ? ' top1' : '');
+    return h('article', { 'class': cls, 'data-rank': rank || null },
+      rank ? h('span', { 'class': 'rank' }, p2(rank)) : null,
       h('div', { 'class': 'meta' }, h('span', { 'class': 'badge cat' }, catName[t.cat] || t.cat), t.media && t.media.length ? h('span', { 'class': 'heat' }, t.heat + '媒体が報道') : h('span', { 'class': 'heat' }, 'レポートから作成（AI）')),
       h('h3', { 'class': 'ev-title' }, t.title),
-      h('p', { 'class': 'sum' }, t.blurb),
-      t.media && t.media.length ? h('details', { 'class': 'inline' }, h('summary', null, '報道を見る（' + t.media.length + '件）'), h('ul', { 'class': 'media' }, t.media.map(mediaRow))) : null,
-      reads.length ? h('div', { 'class': 'reads' }, h('h4', { 'class': 'reads-h' }, 'この出来事を理解するために読む'), reads) : (t.media && t.media.length ? h('p', { 'class': 'sub' }, 'この出来事に合う記事は、まだ記事データベースにありません。') : null),
-      t.tags && t.tags.length ? h('div', { 'class': 'tags' }, t.tags.map(function (x) { return h('button', { 'class': 'tag', type: 'button', onclick: function () { goSearch(x); } }, x); })) : null);
+      why ? h('p', { 'class': 'why1' }, h('span', { 'class': 'why1-t' }, '読む'), link(wa.url, wa.title), why.why ? h('span', { 'class': 'why1-w' }, why.why) : null) : null,
+      h('div', { 'class': 'detail' },
+        h('p', { 'class': 'sum' }, t.blurb),
+        t.media && t.media.length ? h('details', { 'class': 'inline' }, h('summary', null, '報道を見る（' + t.media.length + '件）'), h('ul', { 'class': 'media' }, t.media.map(mediaRow))) : null,
+        reads.length ? h('div', { 'class': 'reads' }, h('h4', { 'class': 'reads-h' }, 'この出来事を理解するために読む'), reads) : (t.media && t.media.length ? h('p', { 'class': 'sub' }, 'この出来事に合う記事は、まだ記事データベースにありません。') : null),
+        t.tags && t.tags.length ? h('div', { 'class': 'tags' }, t.tags.map(function (x) { return h('button', { 'class': 'tag', type: 'button', onclick: function () { goSearch(x); } }, x); })) : null));
   }
 
   function viewToggle(onchange) {
@@ -429,7 +435,7 @@
     var nreads = set ? set.topics.reduce(function (s, t) { return s + (t.reads || []).length; }, 0) : 0;
     var blk = h('section', { 'class': 'block' }, h('h2', null, '今週の出来事', h('small', null, set ? fmtDate(set.date) + '　読む記事は ' + nreads + '本' : '')));
     if (set && set.topics.length) {
-      var stack = h('div', { 'class': 'stack' }); set.topics.forEach(function (t) { stack.appendChild(eventCard(t)); }); blk.appendChild(stack);
+      var stack = h('div', { 'class': 'stack' }); set.topics.forEach(function (t, i) { stack.appendChild(eventCard(t, i + 1)); }); blk.appendChild(stack);
     } else blk.appendChild(h('p', { 'class': 'empty' }, '出来事はまだありません。定期タスクの実行後に表示されます。'));
     page.appendChild(blk);
     var tc = PUBLIC ? 0 : todoCount();
@@ -474,7 +480,7 @@
         if (!list.length) return;
         if (m !== lastM) { out.appendChild(h('div', { 'class': 'daterow' }, m.slice(0, 4) + '年' + (+m.slice(5)) + '月')); lastM = m; }
         var det = h('details', { 'class': 'weekbox', open: n < 2 }, h('summary', null, weekLabel(k), h('span', { 'class': 'cnt' }, list.length + '件')));
-        var stack = h('div', { 'class': 'stack' }); list.forEach(function (t) { stack.appendChild(eventCard(t)); }); det.appendChild(stack);
+        var stack = h('div', { 'class': 'stack' }); list.forEach(function (t) { stack.appendChild(eventCard(t, weeks[k].indexOf(t) + 1)); }); det.appendChild(stack);
         out.appendChild(det); n++;
       });
       if (!n) out.appendChild(h('p', { 'class': 'empty' }, '該当する出来事がありません。'));

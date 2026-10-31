@@ -220,3 +220,6 @@ textarea, .notebox input.field { width: 100%; border: 1px solid var(--line); bac
 .card.event details.more { margin-top: 4px; }
 .card.event details.more > summary, .card.event details.inline > summary { font-size: 12.5px; }
 .weekbox > summary { padding: 4px 0; }
+
+/* round 3 hooks: hidden unless a theme turns them on */
+.rank, .why1 { display: none; }
