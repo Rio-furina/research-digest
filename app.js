@@ -1155,7 +1155,8 @@
     var t = (location.hash || '#home').slice(1);
     if (!pages[t] || (PUBLIC && t === 'notes')) t = 'home';
     var nav = document.getElementById('tabs'); nav.textContent = '';
-    TABS.forEach(function (x) { nav.appendChild(h('a', { href: '#' + x[0], 'aria-current': x[0] === t ? 'page' : null }, x[1])); });
+    TABS.forEach(function (x) { if (x[0] !== 'about') nav.appendChild(h('a', { href: '#' + x[0], 'aria-current': x[0] === t ? 'page' : null }, x[1])); });
+    var hb = document.getElementById('help'); if (hb) { if (t === 'about') hb.setAttribute('aria-current', 'page'); else hb.removeAttribute('aria-current'); }
     app.textContent = ''; app.appendChild(pages[t]()); renderSide(); window.scrollTo(0, 0);
   }
   var foot = document.getElementById('foot');
