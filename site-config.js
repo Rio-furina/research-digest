@@ -1,1 +1,1 @@
-window.SITECFG = {"adsenseClient":"","adSlots":{"home":"","list":"","side":""},"analyticsToken":"","supabaseUrl":"","supabaseAnonKey":""};
+window.SITECFG = {"adsenseClient":"","adSlots":{"home":"","list":"","side":""},"analyticsToken":"","supabaseUrl":"https://sjlhpbstufzfmjibapbg.supabase.co","supabaseAnonKey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNqbGhwYnN0dWZ6Zm1qaWJhcGJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1MjkzMTgsImV4cCI6MjEwOTEwNTMxOH0.--RYIGZOKgqRjFDctUAsMyUEyx28vVZUj5mwBfFuqtM"};
