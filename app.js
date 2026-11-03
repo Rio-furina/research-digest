@@ -576,7 +576,7 @@
     state.kind = kind; state.limit = 60;
     var isReport = kind === 'report';
     var page = h('div', null, h('h2', { 'class': 'page-title' }, isReport ? 'レポート' : '記事',
-      h('small', null, isReport ? '経済見通し・月報/週報・金融市場や政策の分析レポート・論文。2026年分のライブラリ' : 'コラム・解説・速報。2026年分のライブラリ。要約のないものは見出しだけ表示します')));
+      h('small', null, isReport ? '経済見通し・月報/週報・金融市場や政策の分析レポート・論文。2025年以降のライブラリ' : 'コラム・解説・速報。2025年以降のライブラリ。要約のないものは見出しだけ表示します')));
     var results = h('div');
     function paint() {
       results.textContent = '';
@@ -595,7 +595,7 @@
     var srcs = []; D.articles.forEach(function (a) { if (srcs.indexOf(a.src) < 0) srcs.push(a.src); });
     var q = h('input', { 'class': 'field', type: 'search', placeholder: 'キーワード検索（タイトル・要約・タグ）', value: state.q, 'aria-label': '検索', oninput: function (e) { state.q = e.target.value.trim(); state.limit = 60; paint(); } });
     var period = h('select', { 'class': 'field', 'aria-label': '期間', onchange: function (e) { state.period = e.target.value; state.limit = 60; paint(); } },
-      [['7', '直近1週間'], ['30', '直近1か月'], ['90', '直近3か月'], ['all', '2026年のすべて（月ごと）']].map(function (o) { return h('option', { value: o[0], selected: state.period === o[0] }, o[1]); }));
+      [['7', '直近1週間'], ['30', '直近1か月'], ['90', '直近3か月'], ['all', '2025年以降のすべて（月ごと）']].map(function (o) { return h('option', { value: o[0], selected: state.period === o[0] }, o[1]); }));
     var src = h('select', { 'class': 'field', 'aria-label': '機関', onchange: function (e) { state.src = e.target.value; state.limit = 60; paint(); } },
       [h('option', { value: 'all' }, 'すべての機関')].concat(srcs.map(function (s) { return h('option', { value: s, selected: state.src === s }, s); })));
     var years = []; D.articles.forEach(function (a) { var y = adate(a).slice(0, 4); if (y && years.indexOf(y) < 0) years.push(y); }); years.sort().reverse();
