@@ -509,7 +509,21 @@
     return (a.getMonth() + 1) + '/' + a.getDate() + '〜' + (b.getMonth() + 1) + '/' + b.getDate() + 'の週';
   }
   function weekMonth(ws) { var a = parseYmd(ws); a.setDate(a.getDate() + 3); return a.getFullYear() + '-' + p2(a.getMonth() + 1); }   // the month most of the week falls in
-  var evState = { month: 'all', cat: 'all' };
+  // Region of an event: 'jp' (Japan is the main stage) or 'global' (overseas / world markets). The AI sets t.region for new events;
+  // older events have none, so it is guessed from the words in the title, tags and blurb (title and tags count double).
+  var RE_GLOBAL = /米国|アメリカ|米(?=株|中|金利|経済|景気|雇用|関税|大統領|政権|議会|債|ドル|利下げ|利上げ|FRB)|FRB|FOMC|パウエル|トランプ|バイデン|ハリス|欧州|ユーロ|ECB|英国|イギリス|中国|ドイツ|フランス|イタリア|スペイン|豪州|オーストラリア|カナダ|インド|韓国|台湾|ロシア|ウクライナ|中東|イラン|イスラエル|ガザ|OPEC|世界|グローバル|国際|IMF|世界銀行|ニューヨーク|ウォール街|ダウ|ナスダック|S&P|新興国|BRICS|G7|G20|ビットコイン|暗号資産|エヌビディア|NVIDIA|ブラジル|メキシコ|トルコ|アルゼンチン|サウジ|ASEAN|アジア|ベトナム|インドネシア|スイス|北朝鮮|ベネズエラ|海外|外国/g;
+  var RE_JP = /日本|日銀|国内|政府|首相|内閣|財務省|経産省|厚労省|総務省|国交省|金融庁|経団連|日経平均|TOPIX|東証|国債|年金|NISA|賃上げ|春闘|最低賃金|消費税|減税|補正予算|予算|参院選|衆院選|選挙|自民|立憲|国民民主|維新|与党|野党|高市|石破|岸田|植田|住宅ローン|フラット35|マンション|家計|コメ(?!ント)|物価高|ガソリン|電気代|円安|円高|為替介入|東京|大阪|日本企業|ソフトバンク|トヨタ|ホンダ|日産|みずほ|三菱UFJ|三井住友|ゆうちょ|郵政|少子化|人口減|地方|人手不足|働き方|育児|介護|医療費|社会保障|相続|税制|給付|年収の壁|ふるさと納税|日本株|邦銀|国民生活|消費者/g;
+  function regionOf(t) {
+    if (t.region === 'jp' || t.region === 'global') return t.region;
+    var head = (t.title || '') + ' ' + (t.tags || []).join(' '), body = t.blurb || '';
+    function n(re, s) { var m = s.match(re); return m ? m.length : 0; }
+    var g = 2 * n(RE_GLOBAL, head) + n(RE_GLOBAL, body), j = 2 * n(RE_JP, head) + n(RE_JP, body);
+    if (g > j) return 'global';
+    if (j > g) return 'jp';
+    return t.cat === 'global' ? 'global' : 'jp';
+  }
+  var REGIONS = [['all', 'すべて'], ['jp', '国内'], ['global', '海外・グローバル']];
+  var evState = { month: 'all', cat: 'all', region: 'all' };
   function eventsPage() {
     var page = h('div', null, h('h2', { 'class': 'page-title' }, '出来事', h('small', null, '週ごとの重要な出来事（5〜7件）と、理解のための記事')));
     var weeks = {}, order = [];
@@ -521,21 +535,32 @@
     order.sort().reverse();
     if (!order.length) { page.appendChild(h('p', { 'class': 'empty' }, 'まだありません。')); return page; }
     var months = []; order.forEach(function (k) { var m = weekMonth(k); if (months.indexOf(m) < 0) months.push(m); });
-    var out = h('div');
+    var out = h('div'), tabBtns = {};
     function paint() {
       out.textContent = '';
-      var lastM = '', n = 0;
+      var lastM = '', n = 0, cnt = { all: 0, jp: 0, global: 0 };
       order.forEach(function (k) {
         var m = weekMonth(k); if (evState.month !== 'all' && evState.month !== m) return;
-        var list = weeks[k].filter(function (t) { return evState.cat === 'all' || t.cat === evState.cat; });
+        var inCat = weeks[k].filter(function (t) { return evState.cat === 'all' || t.cat === evState.cat; });
+        inCat.forEach(function (t) { cnt.all++; cnt[regionOf(t)]++; });
+        // a tab shows its own ranking: rank 1, 2, 3 ... counted inside the region
+        var pool = evState.region === 'all' ? weeks[k] : weeks[k].filter(function (t) { return regionOf(t) === evState.region; });
+        var list = inCat.filter(function (t) { return evState.region === 'all' || regionOf(t) === evState.region; });
         if (!list.length) return;
         if (m !== lastM) { out.appendChild(h('div', { 'class': 'daterow' }, m.slice(0, 4) + '年' + (+m.slice(5)) + '月')); lastM = m; }
         var det = h('details', { 'class': 'weekbox', open: n < 2 }, h('summary', null, weekLabel(k), h('span', { 'class': 'cnt' }, list.length + '件')));
-        var stack = h('div', { 'class': 'stack' }); list.forEach(function (t) { stack.appendChild(eventCard(t, weeks[k].indexOf(t) + 1)); }); det.appendChild(stack);
+        var stack = h('div', { 'class': 'stack' }); list.forEach(function (t) { stack.appendChild(eventCard(t, pool.indexOf(t) + 1)); }); det.appendChild(stack);
         out.appendChild(det); n++;
       });
+      REGIONS.forEach(function (r) { tabBtns[r[0]].textContent = r[1] + '（' + cnt[r[0]] + '）'; tabBtns[r[0]].setAttribute('aria-selected', String(evState.region === r[0])); });
       if (!n) out.appendChild(h('p', { 'class': 'empty' }, '該当する出来事がありません。'));
     }
+    var regTabs = h('div', { 'class': 'regtabs', role: 'tablist', 'aria-label': '国内・海外' });
+    REGIONS.forEach(function (r) {
+      tabBtns[r[0]] = h('button', { 'class': 'regtab', type: 'button', role: 'tab', onclick: function () { evState.region = r[0]; paint(); } }, r[1]);
+      regTabs.appendChild(tabBtns[r[0]]);
+    });
+    page.appendChild(regTabs);
     var msel = h('select', { 'class': 'field', 'aria-label': '月', onchange: function (e) { evState.month = e.target.value; paint(); } },
       [h('option', { value: 'all' }, 'すべての月')].concat(months.map(function (m) { return h('option', { value: m }, m.slice(0, 4) + '年' + (+m.slice(5)) + '月'); })));
     var csel = h('select', { 'class': 'field', 'aria-label': '分野', onchange: function (e) { evState.cat = e.target.value; paint(); } },
