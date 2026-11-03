@@ -1183,7 +1183,9 @@
     var nav = document.getElementById('tabs'); nav.textContent = '';
     TABS.forEach(function (x) { if (x[0] !== 'about') nav.appendChild(h('a', { href: '#' + x[0], 'aria-current': x[0] === t ? 'page' : null }, x[1])); });
     var hb = document.getElementById('help'); if (hb) { if (t === 'about') hb.setAttribute('aria-current', 'page'); else hb.removeAttribute('aria-current'); }
-    app.textContent = ''; app.appendChild(pages[t]()); renderSide(); window.scrollTo(0, 0);
+    app.textContent = ''; var pg = pages[t](); app.appendChild(pg); renderSide(); window.scrollTo(0, 0);
+    // home and the article/report lists place their own ad; every other tab gets one under the content (not the login page)
+    if (window.Ads && t !== 'home' && t !== 'articles' && t !== 'reports' && t !== 'login') { var adE = window.Ads.slot('list'); if (adE) pg.appendChild(adE); }
   }
   var foot = document.getElementById('foot');
   foot.textContent = '要約・レベル・歴史の補足はAIが作成しています。正確な内容は必ず原文でご確認ください。各レポートの著作権は各機関にあります。このサイトは見出し・要約・リンクのみを掲載しています。　更新: ' + D.generated;
