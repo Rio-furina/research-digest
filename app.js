@@ -944,7 +944,7 @@
   function glossAll() {
     if (glossCache) return glossCache;
     var map = {}, out = [];
-    (D.glossary || []).forEach(function (g) { if (g && g.t && !map[g.t]) { map[g.t] = { t: g.t, d: g.d, ex: g.ex || '', cat: g.cat || '', alias: g.alias || [], n: 0 }; out.push(map[g.t]); } });
+    (D.glossary || []).forEach(function (g) { if (g && g.t && !map[g.t]) { map[g.t] = { t: g.t, d: g.d, ex: g.ex || '', cat: g.cat || '', alias: g.alias || [], id: g.id || '', rel: g.rel || [], n: 0 }; out.push(map[g.t]); } });
     D.articles.forEach(function (a) { (a.terms || []).forEach(function (t) {
       if (!t.t) return;
       if (!map[t.t]) { map[t.t] = { t: t.t, d: t.d, ex: '', cat: '記事から', alias: [], n: 0 }; out.push(map[t.t]); }
@@ -981,6 +981,8 @@
       h('div', { 'class': 'detail' },
         g.ex ? h('p', { 'class': 'tip' }, h('b', null, '例・ヒント　'), g.ex) : null,
         g.alias && g.alias.length ? h('p', { 'class': 'sub' }, '別の呼び方：' + g.alias.join('、')) : null,
+        g.rel && g.rel.length ? h('p', { 'class': 'sub' }, '関連：', g.rel.slice(0, 6).map(function (r) { return h('button', { 'class': 'tag', type: 'button', onclick: function (e) { e.stopPropagation(); openGloss(r); } }, r); })) : null,
+        g.id && location.protocol !== 'file:' ? h('p', null, h('a', { href: 'g/' + g.id + '.html', onclick: function (e) { e.stopPropagation(); } }, 'くわしい解説ページを開く →')) : null,
         h('div', { 'class': 'frow' }, sel, h('button', { 'class': 'btn ghost', type: 'button', onclick: function (e) { e.stopPropagation(); goSearch(g.t); } }, 'この言葉で記事を探す'))));
     c.__term = g; return c;
   }

@@ -193,3 +193,10 @@ main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
 /* institution's own summary, quoted */
 .official { margin: .5rem 0 0; padding: .55rem .8rem; border-left: 3px solid var(--line, #bbb); background: var(--soft, rgba(127,127,127,.08)); font-size: .92em; line-height: 1.7; }
 .official footer { margin-top: .35rem; font-size: .85em; opacity: .75; }
+
+/* glossary term pages: related terms as chips, English name */
+.prose ul.rel{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:.4rem 0 1rem}
+.prose ul.rel li{margin:0}
+.prose ul.rel a{display:inline-block;padding:.25rem .7rem;border:1px solid currentColor;border-radius:999px;text-decoration:none;font-size:.9rem;opacity:.9}
+.prose ul.rel a:hover{opacity:1;text-decoration:underline}
+.prose .sub{opacity:.75;margin:.2rem 0}
