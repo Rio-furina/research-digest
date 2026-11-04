@@ -189,3 +189,7 @@ main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
 .regtab:hover { color: var(--accent); }
 .regtab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 @media (max-width: 520px) { .regtabs { width: 100%; } .regtab { flex: 1; padding: 8px 6px; font-size: 14px; } }
+
+/* institution's own summary, quoted */
+.official { margin: .5rem 0 0; padding: .55rem .8rem; border-left: 3px solid var(--line, #bbb); background: var(--soft, rgba(127,127,127,.08)); font-size: .92em; line-height: 1.7; }
+.official footer { margin-top: .35rem; font-size: .85em; opacity: .75; }

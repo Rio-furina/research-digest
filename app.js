@@ -289,13 +289,19 @@
       a.added === D.latest ? h('span', { 'class': 'badge new' }, 'NEW') : null);
     meta.appendChild(markBar('a:' + a.id));
     var kids = [meta, h('h3', null, link(a.url, a.title))];
-    if (a.raw) kids.push(h('p', { 'class': 'sub' }, '要約なし（見出しだけ収集）'));
+    if (a.raw) kids.push(a.off ? officialBlock(a) : h('p', { 'class': 'sub' }, '要約なし（見出しだけ収集）'));
     else {
       kids.push(h('p', { 'class': 'one' }, a.one));
       kids.push(h('details', { 'class': 'more', open: open }, h('summary', null, '要約・関連を見る'), summaryDetail(a)));
     }
     kids.push(noteToggle(a), originLine(a));
     return h('article', { 'class': 'card cat-' + a.cat + (a.raw ? ' rawcard' : '') }, kids);
+  }
+
+  // The institution's own summary paragraph, quoted as written (the lead / "summary" of the article page), with its source.
+  function officialBlock(a) {
+    return h('blockquote', { 'class': 'official' }, a.off,
+      h('footer', null, '出典：', link(a.url, a.src + '「' + a.title + '」'), '（公式ページの冒頭にある要旨・概要を引用。著作権は各機関に帰属します）'));
   }
 
   function learnBox(r) {
@@ -325,6 +331,7 @@
       d.setAttribute('data-ready', '1');
       add(d, learnBox(r));
       if (!a.raw) d.appendChild(h('div', { 'class': 'inner' }, h('p', { 'class': 'one' }, a.one), summaryDetail(a)));
+      else if (a.off) d.appendChild(h('div', { 'class': 'inner' }, officialBlock(a)));
       if (!PUBLIC) d.appendChild(h('div', { 'class': 'inner' }, h('h4', { 'class': 'reads-h' }, 'この記事のノート'), noteBox(a)));
     });
     return d;
