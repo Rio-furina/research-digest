@@ -79,7 +79,7 @@ html[data-theme=pop] { --bg: #f7f8fc; --surface: #ffffff; --ink: #1f2333; --mute
 @media (prefers-color-scheme: dark) { html[data-theme=pop] { --bg: #14151c; --surface: #1e2030; --ink: #ecedf5; --muted: #a3a8c3; --line: #2c2f45; --accent: #9b9bff; --accent-ink: #14151c; --soft: #26284a; } }
 html[data-theme=pop] .top { background: var(--surface); border-bottom: 0; box-shadow: 0 1px 0 var(--line); }
 html[data-theme=pop] .brand { font-size: 20px; }
-html[data-theme=pop] .brand::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #5b5bf0, #ec4899); margin-right: 8px; }
+html[data-theme=pop] .brand::before { content: none; }
 html[data-theme=pop] #tabs { background: var(--soft); border-radius: 999px; padding: 3px; gap: 2px; margin-bottom: 8px; }
 html[data-theme=pop] #tabs a { border: 0; border-radius: 999px; padding: 6px 16px; }
 html[data-theme=pop] #tabs a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
@@ -206,3 +206,8 @@ main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
 .tabs2 .chip[aria-pressed="true"] { border-color: var(--accent); font-weight: 600; }
 .poplist { margin: 0; padding-left: 1.6em; }
 .poplist li { margin: 6px 0; }
+
+/* ロゴ画像(全テーマ共通) */
+.brand { display: inline-flex; align-items: center; padding-bottom: 0; }
+.brand .logo { height: 30px; width: auto; display: block; max-width: 100%; }
+@media (max-width: 520px) { .brand .logo { height: 24px; } }

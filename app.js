@@ -47,7 +47,7 @@
 
   if (!D) { app.textContent = 'data.js が見つかりません。scripts\\build.ps1 を実行してください。'; return; }
   document.title = D.site.title;
-  document.getElementById('brand').textContent = D.site.title;
+  var _b = document.querySelector('#brand img'); if (_b) _b.alt = D.site.title; else document.getElementById('brand').textContent = D.site.title;
 
   var byId = {}, catName = {}, levels = {}, scopes = {};
   D.articles.forEach(function (a) { byId[a.id] = a; });
