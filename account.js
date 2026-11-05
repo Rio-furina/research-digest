@@ -89,3 +89,22 @@
     return fresh().then(function () { return api('POST', '/rest/v1/rpc/delete_my_account', {}); }).then(function () { store(null); });
   };
 })();
+
+// Views: counts clicks on report links (once per report per browser per day) and reads the ranking. Stores no personal data.
+(function () {
+  'use strict';
+  var C = window.SITECFG || {}, V = window.Views = { enabled: false, hit: function () {}, top: function () { return Promise.resolve([]); } };
+  if (!C.supabaseUrl || !C.supabaseAnonKey || !/^https?:$/.test(location.protocol)) return;
+  var U = C.supabaseUrl.replace(/\/+$/, ''), K = C.supabaseAnonKey;
+  function rpc(fn, body) {
+    return fetch(U + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: K, Authorization: 'Bearer ' + K, 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true })
+      .then(function (r) { return r.ok ? r.text().then(function (t) { return t ? JSON.parse(t) : null; }) : null; }, function () { return null; });
+  }
+  V.enabled = true;
+  V.hit = function (kind, id) {
+    var key = 'digest.v.' + kind + '.' + id, day = new Date().toISOString().slice(0, 10);
+    try { if (localStorage.getItem(key) === day) return; localStorage.setItem(key, day); } catch (e) { /* private mode: count anyway */ }
+    rpc('hit', { p_kind: kind, p_id: String(id) });
+  };
+  V.top = function (kind, days, limit) { return rpc('top_views', { p_kind: kind, p_days: days, p_limit: limit || 5 }).then(function (j) { return j || []; }); };
+})();

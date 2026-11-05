@@ -483,6 +483,36 @@
     return h('section', { 'class': 'hs' }, input, chips, out);
   }
 
+  // Report views: a click on a report's original link counts once per browser per day (see account.js, Views).
+  var byUrl = {}; D.articles.forEach(function (a) { if (a.url) byUrl[a.url] = a.id; });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href]') : null;
+    if (a && window.Views && window.Views.enabled && byUrl[a.href]) window.Views.hit('report', byUrl[a.href]);
+  });
+  // Home: popular reports. Two tabs: rising (last 7 days) and all-time.
+  function popularBlock() {
+    var box = h('section', { 'class': 'block' }), list = h('ol', { 'class': 'poplist' }), tabs = h('div', { 'class': 'tabs2' });
+    var modes = [['rise', '急上昇（1週間）', 7], ['all', '定番（全期間）', 0]];
+    function show(m) {
+      list.textContent = '';
+      list.appendChild(h('li', { 'class': 'sub' }, '読み込み中…'));
+      window.Views.top('report', m[2], 5).then(function (rows) {
+        list.textContent = '';
+        var n = 0;
+        rows.forEach(function (r) {
+          var a = byId[r.id]; if (!a) return; n++;
+          list.appendChild(h('li', null, link(a.url, a.title), h('span', { 'class': 'sub' }, '　' + a.src + '　閲覧 ' + r.views)));
+        });
+        if (!n) list.appendChild(h('li', { 'class': 'sub' }, 'まだ集計がありません。'));
+      });
+      Array.prototype.forEach.call(tabs.children, function (b, i) { b.setAttribute('aria-pressed', modes[i] === m ? 'true' : 'false'); });
+    }
+    modes.forEach(function (m) { tabs.appendChild(h('button', { type: 'button', 'class': 'chip', onclick: function () { show(m); } }, m[1])); });
+    box.appendChild(h('h2', null, '人気のレポート', h('small', null, '原文リンクを開いた回数')));
+    box.appendChild(tabs); box.appendChild(list); show(modes[0]);
+    return box;
+  }
+
   function home() {
     var page = h('div');
     var total = D.articles.length, sums = D.articles.filter(function (a) { return !a.raw; }).length;
@@ -496,6 +526,7 @@
       var stack = h('div', { 'class': 'stack' }); set.topics.forEach(function (t, i) { stack.appendChild(eventCard(t, i + 1)); }); blk.appendChild(stack);
     } else blk.appendChild(h('p', { 'class': 'empty' }, '出来事はまだありません。定期タスクの実行後に表示されます。'));
     page.appendChild(blk);
+    if (PUBLIC && window.Views && window.Views.enabled) page.appendChild(popularBlock());
     var tc = PUBLIC ? 0 : todoCount();
     if (!PUBLIC) page.appendChild(h('section', { 'class': 'block' }, h('h2', null, 'ノート'),
       h('p', { 'class': 'lead' }, tc ? '「もっと調べたいこと」が ' + tc + '件あります。' : 'ノートに「わからないところ」「学んだこと」「調べたいこと」を書くと、ここに集まります。', ' ', h('a', { href: '#notes' }, 'ノートを開く →'))));

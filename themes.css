@@ -200,3 +200,9 @@ main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
 .prose ul.rel a{display:inline-block;padding:.25rem .7rem;border:1px solid currentColor;border-radius:999px;text-decoration:none;font-size:.9rem;opacity:.9}
 .prose ul.rel a:hover{opacity:1;text-decoration:underline}
 .prose .sub{opacity:.75;margin:.2rem 0}
+
+/* popular reports (home) */
+.tabs2 { display: flex; gap: 8px; margin: 6px 0 10px; flex-wrap: wrap; }
+.tabs2 .chip[aria-pressed="true"] { border-color: var(--accent); font-weight: 600; }
+.poplist { margin: 0; padding-left: 1.6em; }
+.poplist li { margin: 6px 0; }
