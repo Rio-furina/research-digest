@@ -480,6 +480,7 @@
     var chips = h('div', { 'class': 'hs-chips' }, ['物価', '日銀', '金利', '為替', 'トランプ', 'AI', '賃金', '財政'].map(function (w) {
       return h('button', { 'class': 'tag', type: 'button', onclick: function () { input.value = w; run(); } }, w);
     }));
+    if (window.__hq) { input.value = window.__hq; window.__hq = ''; run(); }
     return h('section', { 'class': 'hs' }, input, chips, out);
   }
 
@@ -1219,6 +1220,7 @@
   var pages = { home: home, events: eventsPage, articles: function () { return libraryPage('article'); }, reports: function () { return libraryPage('report'); }, gloss: glossaryPage, my: myPage, notes: notesPage, about: aboutPage };
   function route() {
     var t = (location.hash || '#home').slice(1);
+    if (t.indexOf('search=') === 0) { try { window.__hq = decodeURIComponent(t.slice(7)); } catch (e) { window.__hq = t.slice(7); } t = 'home'; var hi = document.querySelector('form.hsearch input'); if (hi) hi.value = window.__hq; }
     if (!pages[t] || (PUBLIC && t === 'notes')) t = 'home';
     var nav = document.getElementById('tabs'); nav.textContent = '';
     TABS.forEach(function (x) { if (x[0] !== 'about') nav.appendChild(h('a', { href: '#' + x[0], 'aria-current': x[0] === t ? 'page' : null }, x[1])); });
