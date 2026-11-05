@@ -402,7 +402,7 @@
     function paint() {
       out.textContent = '';
       var s = q.value.trim().toLowerCase();
-      var list = arr.filter(function (x) { return !s || x.t.toLowerCase().indexOf(s) >= 0 || (x.d || '').toLowerCase().indexOf(s) >= 0; }).slice(0, 8);
+      var list = arr.filter(function (x) { return !s || (x.t + ' ' + (x.en || '') + ' ' + (x.alias || []).join(' ') + ' ' + (x.d || '')).toLowerCase().indexOf(s) >= 0; }).slice(0, 8);
       if (!list.length) out.appendChild(h('li', { 'class': 'sub' }, '見つかりません'));
       list.forEach(function (x) { out.appendChild(h('li', null, h('button', { 'class': 'tag', type: 'button', onclick: function () { openGloss(x.t); } }, x.t), h('div', { 'class': 'sub' }, x.d))); });
     }
@@ -975,7 +975,7 @@
   function glossAll() {
     if (glossCache) return glossCache;
     var map = {}, out = [];
-    (D.glossary || []).forEach(function (g) { if (g && g.t && !map[g.t]) { map[g.t] = { t: g.t, d: g.d, ex: g.ex || '', cat: g.cat || '', alias: g.alias || [], id: g.id || '', rel: g.rel || [], n: 0 }; out.push(map[g.t]); } });
+    (D.glossary || []).forEach(function (g) { if (g && g.t && !map[g.t]) { map[g.t] = { t: g.t, d: g.d, ex: g.ex || '', cat: g.cat || '', alias: g.alias || [], en: g.en || '', id: g.id || '', rel: g.rel || [], n: 0 }; out.push(map[g.t]); } });
     D.articles.forEach(function (a) { (a.terms || []).forEach(function (t) {
       if (!t.t) return;
       if (!map[t.t]) { map[t.t] = { t: t.t, d: t.d, ex: '', cat: '記事から', alias: [], n: 0 }; out.push(map[t.t]); }
@@ -1033,7 +1033,7 @@
         if (gst.cat !== 'all' && g.cat !== gst.cat) return false;
         if (gst.mark && !(My.d.marks['t:' + g.t] || []).length) return false;
         if (!s) return true;
-        return (g.t + ' ' + (g.d || '') + ' ' + (g.alias || []).join(' ')).toLowerCase().indexOf(s) >= 0;
+        return (g.t + ' ' + (g.en || '') + ' ' + (g.d || '') + ' ' + (g.alias || []).join(' ') + ' ' + (g.rel || []).join(' ')).toLowerCase().indexOf(s) >= 0;
       });
       cnt.textContent = list.length + '語';
       list.slice(0, gst.limit).forEach(function (g) { out.appendChild(termCard(g)); });
