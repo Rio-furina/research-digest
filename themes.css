@@ -14,14 +14,21 @@ html[data-theme=pop] .cat-global { --c: #14b8a6; --ct: #ccfbf1; --cx: #0f766e; }
 html[data-theme=pop] .cat-politics { --c: #8b5cf6; --ct: #ede9fe; --cx: #6d28d9; }
 html[data-theme=pop] .cat-industry { --c: #eab308; --ct: #fef9c3; --cx: #a16207; }
 html[data-theme=pop] .cat-society { --c: #ec4899; --ct: #fce7f3; --cx: #be185d; }
+html[data-theme=pop][data-color=dark] { --l1: #86efac; --l1b: #14301f; --l2: #93c5fd; --l2b: #172a46; --l3: #d1d5db; --l3b: #2a2f3a; --warn: #f1b65a; --warnb: #2b2111; --new: #f9a8d4; --newb: #4a1d33; --ct: #1f2937; --cx: #cbd5e1; }
+html[data-theme=pop][data-color=dark] .cat-markets { --ct: #1e3a5f; --cx: #93c5fd; }
+html[data-theme=pop][data-color=dark] .cat-japan { --ct: #4a2a14; --cx: #fdba74; }
+html[data-theme=pop][data-color=dark] .cat-global { --ct: #123f3b; --cx: #5eead4; }
+html[data-theme=pop][data-color=dark] .cat-politics { --ct: #33265a; --cx: #c4b5fd; }
+html[data-theme=pop][data-color=dark] .cat-industry { --ct: #423a10; --cx: #fde047; }
+html[data-theme=pop][data-color=dark] .cat-society { --ct: #4a1d33; --cx: #f9a8d4; }
 @media (prefers-color-scheme: dark) {
-  html[data-theme=pop] { --l1: #86efac; --l1b: #14301f; --l2: #93c5fd; --l2b: #172a46; --l3: #d1d5db; --l3b: #2a2f3a; --warn: #f1b65a; --warnb: #2b2111; --new: #f9a8d4; --newb: #4a1d33; --ct: #1f2937; --cx: #cbd5e1; }
-  html[data-theme=pop] .cat-markets { --ct: #1e3a5f; --cx: #93c5fd; }
-  html[data-theme=pop] .cat-japan { --ct: #4a2a14; --cx: #fdba74; }
-  html[data-theme=pop] .cat-global { --ct: #123f3b; --cx: #5eead4; }
-  html[data-theme=pop] .cat-politics { --ct: #33265a; --cx: #c4b5fd; }
-  html[data-theme=pop] .cat-industry { --ct: #423a10; --cx: #fde047; }
-  html[data-theme=pop] .cat-society { --ct: #4a1d33; --cx: #f9a8d4; }
+  html[data-theme=pop]:not([data-color=light]) { --l1: #86efac; --l1b: #14301f; --l2: #93c5fd; --l2b: #172a46; --l3: #d1d5db; --l3b: #2a2f3a; --warn: #f1b65a; --warnb: #2b2111; --new: #f9a8d4; --newb: #4a1d33; --ct: #1f2937; --cx: #cbd5e1; }
+  html[data-theme=pop]:not([data-color=light]) .cat-markets { --ct: #1e3a5f; --cx: #93c5fd; }
+  html[data-theme=pop]:not([data-color=light]) .cat-japan { --ct: #4a2a14; --cx: #fdba74; }
+  html[data-theme=pop]:not([data-color=light]) .cat-global { --ct: #123f3b; --cx: #5eead4; }
+  html[data-theme=pop]:not([data-color=light]) .cat-politics { --ct: #33265a; --cx: #c4b5fd; }
+  html[data-theme=pop]:not([data-color=light]) .cat-industry { --ct: #423a10; --cx: #fde047; }
+  html[data-theme=pop]:not([data-color=light]) .cat-society { --ct: #4a1d33; --cx: #f9a8d4; }
 }
 
 /* shared behaviour: three levels visible (rank, title, one reading line); the rest opens on click */
@@ -76,7 +83,8 @@ html[data-theme=pop] .themesel { margin-bottom: 0; }
 
 /* ---------- G. Pop Tiles ---------- */
 html[data-theme=pop] { --bg: #f7f8fc; --surface: #ffffff; --ink: #1f2333; --muted: #5b6178; --line: #e6e8f2; --accent: #5b5bf0; --accent-ink: #ffffff; --soft: #eeeeff; }
-@media (prefers-color-scheme: dark) { html[data-theme=pop] { --bg: #14151c; --surface: #1e2030; --ink: #ecedf5; --muted: #a3a8c3; --line: #2c2f45; --accent: #9b9bff; --accent-ink: #14151c; --soft: #26284a; } }
+html[data-theme=pop][data-color=dark] { --bg: #14151c; --surface: #1e2030; --ink: #ecedf5; --muted: #a3a8c3; --line: #2c2f45; --accent: #9b9bff; --accent-ink: #14151c; --soft: #26284a; }
+@media (prefers-color-scheme: dark) { html[data-theme=pop]:not([data-color=light]) { --bg: #14151c; --surface: #1e2030; --ink: #ecedf5; --muted: #a3a8c3; --line: #2c2f45; --accent: #9b9bff; --accent-ink: #14151c; --soft: #26284a; } }
 html[data-theme=pop] .top { background: var(--surface); border-bottom: 0; box-shadow: 0 1px 0 var(--line); }
 html[data-theme=pop] .brand { font-size: 20px; }
 html[data-theme=pop] .brand::before { content: none; }

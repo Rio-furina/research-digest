@@ -1091,6 +1091,7 @@
       h('div', { 'class': 'stack' }, email, pw, h('div', { 'class': 'frow' }, bIn, bUp, bFg)),
       msg,
       h('p', { 'class': 'sub' }, '登録すると、', h('a', { href: 'terms.html' }, '利用規約'), 'と', h('a', { href: 'privacy.html' }, 'プライバシーポリシー'), 'に同意したものとみなします。ログインしなくても、記事・出来事・用語集は読めます。')));
+    page.appendChild(colorBox());
     return page;
   }
   function afterSignIn() { return My.syncDown().then(function () { toast('ログインしました'); route(); }); }
@@ -1120,9 +1121,29 @@
       } }, 'アカウントを削除する'));
   }
 
+  function colorBox() {
+    var cur = lsGet('color'); if (cur !== 'light' && cur !== 'dark') cur = 'auto';
+    var box = h('section', { 'class': 'block' }, h('h2', null, '表示の明るさ'),
+      h('p', { 'class': 'sub' }, '「自動」は、お使いの端末の設定に合わせます。選んだ内容は、このブラウザに保存されます。'));
+    var row = h('div', { 'class': 'frow' });
+    function paint() {
+      row.textContent = '';
+      [['auto', '自動'], ['light', 'ライト'], ['dark', 'ダーク']].forEach(function (o) {
+        row.appendChild(h('button', { 'class': 'chip' + (cur === o[0] ? ' on' : ''), type: 'button', 'aria-pressed': cur === o[0] ? 'true' : 'false', onclick: function () {
+          cur = o[0];
+          if (cur === 'auto') { try { localStorage.removeItem('digest.color'); } catch (e) { /* ignore */ } document.documentElement.removeAttribute('data-color'); }
+          else { lsSet('color', cur); document.documentElement.setAttribute('data-color', cur); }
+          paint();
+        } }, o[1]));
+      });
+    }
+    paint(); box.appendChild(row); return box;
+  }
+
   function myPage() {
     if (ACCT && !window.Acct.user()) return loginPage();
     var page = h('div', null, h('h2', { 'class': 'page-title' }, 'マイページ', h('small', null, 'マーク、用語帳、メモを、自分用にためる場所です')));
+    page.appendChild(colorBox());
     if (ACCT) page.appendChild(accountBox());
     else page.appendChild(h('p', { 'class': 'sub' }, '内容は、このブラウザの中にだけ保存されます（他の人には見えません）。ブラウザを変える・消すときは、下の「書き出し」で保存してください。'));
     // --- marks

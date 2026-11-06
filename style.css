@@ -5,8 +5,16 @@
   --warn: #8a5300; --warnb: #fff1d6; --new: #c2255c; --newb: #fde8ef;
   --font: "Yu Gothic UI", "Hiragino Sans", "Meiryo", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
+:root[data-color=light] { color-scheme: light; }
+:root[data-color=dark] {
+  color-scheme: dark;
+  --bg: #0f1115; --surface: #171a21; --ink: #e9ebf0; --muted: #9aa3b2; --line: #272c36;
+  --accent: #86a8ff; --accent-ink: #0f1115; --soft: #1c2333;
+  --l1: #5fd39b; --l1b: #12261d; --l2: #86a8ff; --l2b: #18213a; --l3: #c9a0ff; --l3b: #251a38;
+  --warn: #f1b65a; --warnb: #2b2111; --new: #ff8fb4; --newb: #34161f;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-color=light]) {
     --bg: #0f1115; --surface: #171a21; --ink: #e9ebf0; --muted: #9aa3b2; --line: #272c36;
     --accent: #86a8ff; --accent-ink: #0f1115; --soft: #1c2333;
     --l1: #5fd39b; --l1b: #12261d; --l2: #86a8ff; --l2b: #18213a; --l3: #c9a0ff; --l3b: #251a38;
