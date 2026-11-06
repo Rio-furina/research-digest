@@ -1253,7 +1253,7 @@
   var foot = document.getElementById('foot');
   foot.textContent = '要約・レベル・歴史の補足はAIが作成しています。正確な内容は必ず原文でご確認ください。各レポートの著作権は各機関にあります。このサイトは見出し・要約・リンクのみを掲載しています。　更新: ' + D.generated;
   if (PUBLIC) {
-    var lk = h('div', { 'class': 'lnks' }, h('a', { href: 'events.html' }, '出来事の一覧'), h('a', { href: 'glossary.html' }, '用語集（一覧）'), h('a', { href: 'privacy.html' }, 'プライバシーポリシー'), h('a', { href: 'terms.html' }, '利用規約・免責'), h('a', { href: 'contact.html' }, '運営者情報・お問い合わせ'));
+    var lk = h('div', { 'class': 'lnks' }, h('a', { href: 'events.html' }, '出来事の一覧'), h('a', { href: 'glossary.html' }, '用語集（一覧）'), h('a', { href: 'privacy.html' }, 'プライバシーポリシー'), h('a', { href: 'terms.html' }, '利用規約・免責'), h('a', { href: 'contact.html' }, '運営者情報・お問い合わせ'), h('a', { href: 'message.html' }, '制作者から一言'));
     if (window.SITECFG && window.SITECFG.adsenseClient) lk.appendChild(h('a', { href: '#', onclick: function (e) { e.preventDefault(); if (window.openConsent) window.openConsent(); } }, 'Cookie設定'));
     foot.appendChild(lk);
   }

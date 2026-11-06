@@ -233,3 +233,24 @@ main.prose { max-width: 760px; margin: 0 auto; padding: 8px 16px 40px; }
 }
 @media print { .hsearch { display: none; } }
 @media (min-width: 721px) { .hsearch { order: 2; } #help { order: 3; } }
+
+/* ===== インストールしたアプリ(html.app)・スマホ幅: 下タブ+安全領域。ブラウザ版と色・カード・文字は共通 ===== */
+html.app { -webkit-tap-highlight-color: transparent; }
+html.app body { overscroll-behavior-y: none; }
+@media (max-width: 720px) {
+  html.app .top { padding-top: env(safe-area-inset-top); }
+  html.app body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  html.app #tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; order: 0; width: auto; margin: 0; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); gap: 0; flex-wrap: nowrap; overflow: visible; justify-content: space-around; background: var(--surface); border-radius: 0; box-shadow: 0 -1px 0 var(--line), 0 -6px 18px rgb(0 0 0 / .06); }
+  html.app #tabs a, html.app #tabs .morebtn { flex: 1 1 0; min-width: 0; min-height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px 2px; font-size: 11.5px; font-weight: 700; line-height: 1.2; color: var(--muted); background: none; border: 0; border-radius: 12px; white-space: nowrap; cursor: pointer; }
+  html.app #tabs .morebtn { display: flex; }
+  html.app #tabs a[aria-current="page"] { color: var(--accent); background: var(--soft); }
+  html.app #tabs a[href="#reports"], html.app #tabs a[href="#notes"] { display: none; }
+  html.app #help { display: none; }
+  html.app .toast { bottom: calc(84px + env(safe-area-inset-bottom)); }
+  html.app button, html.app .chip, html.app .tag { min-height: 40px; }
+  html.app .foot { padding-bottom: 16px; }
+}
+.moresheet { position: fixed; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 30; background: var(--surface); border-radius: 16px; box-shadow: 0 8px 30px rgb(0 0 0 / .22); padding: 6px; display: grid; }
+.moresheet a { display: block; padding: 13px 14px; border-radius: 10px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; }
+.moresheet a:active { background: var(--soft); }
+.morebtn { display: none; }
