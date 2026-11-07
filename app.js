@@ -34,6 +34,8 @@
   function safeUrl(u) { return /^https?:\/\//i.test(u || '') ? u : '#'; }
   function domain(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } }
   function link(href, text, cls) { return h('a', { href: safeUrl(href), target: '_blank', rel: 'noopener noreferrer', referrerpolicy: 'no-referrer', 'class': cls }, text); }
+  var EN = (lsGet('lang') === 'en') || /[?&]lang=en\b/.test(location.search);
+  function tt(a) { return (EN && a && a.te) ? a.te : a.title; }   // English headline when available (EN mode), else the Japanese one
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function ymd(d) { return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
   function daysAgo(n) { var d = new Date(); d.setDate(d.getDate() - n); return ymd(d); }
@@ -266,7 +268,7 @@
       var kind = r.kind || (daysBetween(baseDate, adate(o)) > 21 ? 'past' : 'rel');
       var why = r.why || (r.shared && r.shared.length ? '共通キーワード: ' + r.shared.join('・') : '');
       return h('li', null, h('span', { 'class': 'badge ' + (kind === 'past' ? 'past' : 'rel') }, kind === 'past' ? '過去の参考' : '関連'),
-        levelBadge(o.level), langBadge(o), link(o.url, o.title), h('span', { 'class': 'sub' }, o.src + '　' + (o.date || '')), why ? h('div', { 'class': 'why' }, why) : null);
+        levelBadge(o.level), langBadge(o), link(o.url, tt(o)), h('span', { 'class': 'sub' }, o.src + '　' + (o.date || '')), why ? h('div', { 'class': 'why' }, why) : null);
     }).filter(Boolean);
     return items.length ? h('div', { 'class': 'related' }, h('h4', null, '関連・おすすめ'), h('ul', null, items)) : null;
   }
@@ -288,7 +290,7 @@
       a.partial ? h('span', { 'class': 'badge warn', title: '本文を読めず、概要だけから要約しています' }, '概要のみ') : null,
       a.added === D.latest ? h('span', { 'class': 'badge new' }, 'NEW') : null);
     meta.appendChild(markBar('a:' + a.id));
-    var kids = [meta, h('h3', null, link(a.url, a.title))];
+    var kids = [meta, h('h3', null, link(a.url, tt(a)))];
     if (a.raw) kids.push(a.off ? officialBlock(a) : h('p', { 'class': 'sub' }, '要約なし（見出しだけ収集）'));
     else {
       kids.push(h('p', { 'class': 'one' }, a.one));
@@ -318,7 +320,7 @@
       h('div', { 'class': 'meta' }, h('span', { 'class': 'badge ' + (r.role === 'past' ? 'past' : 'main') }, r.role === 'past' ? '過去の参考' : '読む記事'),
         a.raw ? null : levelBadge(a.level), langBadge(a), h('span', { 'class': 'src' }, a.src), a.date ? h('time', null, a.date) : null,
         a.partial ? h('span', { 'class': 'badge warn' }, '概要のみ') : null, readCheck(a.id)),
-      h('h4', null, link(a.url, a.title)),
+      h('h4', null, link(a.url, tt(a))),
       r.why ? h('p', { 'class': 'why2' }, h('em', { 'class': 'why-l' }, '選んだ理由'), r.why) : null,
       moreBlock(r, a),
       originLine(a));
@@ -346,7 +348,7 @@
       rank ? h('span', { 'class': 'rank' }, p2(rank)) : null,
       h('div', { 'class': 'meta' }, h('span', { 'class': 'badge cat' }, catName[t.cat] || t.cat), t.media && t.media.length ? h('span', { 'class': 'heat' }, t.heat + '媒体が報道') : h('span', { 'class': 'heat' }, 'レポートから作成（AI）')),
       h('h3', { 'class': 'ev-title' }, t.title),
-      why ? h('p', { 'class': 'why1' }, h('span', { 'class': 'why1-t' }, '読む'), link(wa.url, wa.title), why.why ? h('span', { 'class': 'why1-w' }, h('em', { 'class': 'why-l' }, '選んだ理由'), why.why) : null) : null,
+      why ? h('p', { 'class': 'why1' }, h('span', { 'class': 'why1-t' }, '読む'), link(wa.url, tt(wa)), why.why ? h('span', { 'class': 'why1-w' }, h('em', { 'class': 'why-l' }, '選んだ理由'), why.why) : null) : null,
       h('div', { 'class': 'detail' },
         h('p', { 'class': 'sum' }, t.blurb),
         t.media && t.media.length ? h('details', { 'class': 'inline' }, h('summary', null, '報道を見る（' + t.media.length + '件）'), h('ul', { 'class': 'media' }, t.media.map(mediaRow))) : null,
@@ -419,7 +421,7 @@
       ids.length ? h('ul', { 'class': 'chk' }, ids.map(function (id) {
         var a = byId[id], cb = h('input', { type: 'checkbox', 'data-rid': id, 'aria-label': '読んだ' }); cb.checked = !!rm[id];
         cb.addEventListener('change', function () { setRead(id, cb.checked); });
-        return h('li', { 'class': rm[id] ? 'done' : '' }, h('label', null, cb, link(a.url, a.title)), h('div', { 'class': 'sub' }, a.src + (a.date ? '　' + a.date : '')));
+        return h('li', { 'class': rm[id] ? 'done' : '' }, h('label', null, cb, link(a.url, tt(a))), h('div', { 'class': 'sub' }, a.src + (a.date ? '　' + a.date : '')));
       })) : h('p', { 'class': 'sub' }, '出来事の更新後に表示されます。'),
       h('p', { 'class': 'sub' }, 'チェックは、このブラウザの中だけに保存されます。')));
     if (!PUBLIC) {
@@ -439,7 +441,7 @@
     var out = h('div', { 'class': 'hs-out' });
     var input = h('input', { 'class': 'field hs-in', type: 'search', placeholder: '気になる言葉で探す（例：物価、日銀、為替、AI）', 'aria-label': 'サイト内検索' });
     function score(a, qs) {
-      var t = (a.title || '').toLowerCase(), g = (a.tags || []).join(' ').toLowerCase(), o = [a.one, a.sum, a.plain, a.src, (a.terms || []).map(function (x) { return x.t; }).join(' ')].join(' ').toLowerCase(), s = 0;
+      var t = ((a.title || '') + ' ' + (a.te || '')).toLowerCase(), g = (a.tags || []).join(' ').toLowerCase(), o = [a.one, a.sum, a.plain, a.src, (a.terms || []).map(function (x) { return x.t; }).join(' ')].join(' ').toLowerCase(), s = 0;
       for (var i = 0; i < qs.length; i++) {
         var hit = 0;
         if (t.indexOf(qs[i]) >= 0) hit += 3; if (g.indexOf(qs[i]) >= 0) hit += 2; if (o.indexOf(qs[i]) >= 0) hit += 1;
@@ -502,7 +504,7 @@
         var n = 0;
         rows.forEach(function (r) {
           var a = byId[r.id]; if (!a) return; n++;
-          list.appendChild(h('li', null, link(a.url, a.title), h('span', { 'class': 'sub' }, '　' + a.src + '　閲覧 ' + r.views)));
+          list.appendChild(h('li', null, link(a.url, tt(a)), h('span', { 'class': 'sub' }, '　' + a.src + '　閲覧 ' + r.views)));
         });
         if (!n) list.appendChild(h('li', { 'class': 'sub' }, 'まだ集計がありません。'));
       });
@@ -631,7 +633,7 @@
       if (state.month && ad.slice(5, 7) !== (state.month.length < 2 ? '0' : '') + state.month) return false;
     } else if (state.period !== 'all' && adate(a) < daysAgo(+state.period)) return false;
     if (state.q) {
-      var hay = [a.title, a.one, a.sum, a.plain, (a.tags || []).join(' '), (a.terms || []).map(function (t) { return t.t; }).join(' '), a.src].join(' ').toLowerCase();
+      var hay = [a.title, a.te, a.one, a.sum, a.plain, (a.tags || []).join(' '), (a.terms || []).map(function (t) { return t.t; }).join(' '), a.src].join(' ').toLowerCase();
       var qs = state.q.toLowerCase().split(/\s+/).filter(Boolean);
       for (var i = 0; i < qs.length; i++) if (hay.indexOf(qs[i]) < 0) return false;
     }
