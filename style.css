@@ -231,3 +231,5 @@ textarea, .notebox input.field { width: 100%; border: 1px solid var(--line); bac
 
 /* round 3 hooks: hidden unless a theme turns them on */
 .rank, .why1 { display: none; }
+
+.booklist{padding-left:1.2em}.booklist li{margin:0 0 1em}
