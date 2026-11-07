@@ -254,3 +254,10 @@ html.app body { overscroll-behavior-y: none; }
 .moresheet a { display: block; padding: 13px 14px; border-radius: 10px; color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; }
 .moresheet a:active { background: var(--soft); }
 .morebtn { display: none; }
+
+/* 言語切替ボタン */
+.langbtn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 700 12.5px var(--font); border-radius: 999px; padding: 6px 12px; cursor: pointer; margin-bottom: 8px; min-height: 34px; }
+.langbtn:hover { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 720px) { .langbtn { order: 2; margin-bottom: 0; margin-left: auto; } html[data-theme=pop] .bar .brand { order: 1; } }
+html.app .langbtn { min-height: 34px; }
+html[lang=en][data-theme=pop] .card.event.top1::after { content: "Top of the week"; }
