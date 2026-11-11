@@ -411,6 +411,52 @@
     q.addEventListener('input', paint); paint();
     return h('section', { 'class': 'sidebox' }, h('h3', null, '用語集', h('a', { href: '#gloss', 'class': 'cnt' }, 'すべて見る →')), q, out, h('p', { 'class': 'sub' }, '用語を押すと、用語集で詳しく見られます。'));
   }
+  // ---- book boxes (affiliate links; data from books-data.js, built by publish.ps1). Shown only on the public build.
+  var BK = (PUBLIC && window.BOOKS && window.BOOKS.items && window.BOOKS.items.length) ? window.BOOKS : null;
+  var GENRE_HUE = { intro: 215, behav: 28, data: 160, japan: 350, world: 265, invest: 45, acct: 190 };
+  function weekCats() { var set = curWeek(), o = []; if (set) set.topics.forEach(function (t) { if (t.cat && o.indexOf(t.cat) < 0) o.push(t.cat); }); return o; }
+  // Books that match the given categories; novice-friendly levels first; the near-ties rotate weekly so repeat visitors see something new.
+  function pickBooks(cats, n) {
+    if (!BK) return [];
+    var set = curWeek(), seed = set ? weekStart(set.date) : '';
+    var sc = BK.items.map(function (b) {
+      var o = 0; (b.c || []).forEach(function (c) { if (cats.indexOf(c) >= 0) o++; });
+      o = Math.min(o, 2);   // a book tagged with every category must not win every week
+      var s = b.id + seed, hh = 0; for (var i = 0; i < s.length; i++) hh = (hh * 31 + s.charCodeAt(i)) % 997;
+      return { b: b, k: o * 100 + (b.lv === '入門' ? 20 : b.lv === '初級' ? 10 : 0) + hh % 30 };
+    });
+    sc.sort(function (x, y) { return y.k - x.k; });
+    return sc.slice(0, n).map(function (x) { return x.b; });
+  }
+  function bookCover(b) {
+    if (b.img) return h('img', { 'class': 'bk-cover', src: b.img, alt: '', loading: 'lazy', width: 56, height: 80, referrerpolicy: 'no-referrer' });
+    var c = h('div', { 'class': 'bk-cover bk-gen', 'aria-hidden': 'true' }, h('span', null, b.t.length > 24 ? b.t.slice(0, 23) + '…' : b.t));
+    c.style.setProperty('--hue', GENRE_HUE[b.g] != null ? GENRE_HUE[b.g] : 220); return c;
+  }
+  function bookCard(b, compact) {
+    return h('div', { 'class': 'bk' + (compact ? ' compact' : '') }, bookCover(b),
+      h('div', { 'class': 'bk-body' }, h('span', { 'class': 'bk-lv' }, b.lv), h('b', { 'class': 'bk-t' }, b.t), h('div', { 'class': 'sub' }, b.a),
+        compact ? null : h('p', { 'class': 'bk-w' }, b.w),
+        h('div', { 'class': 'bk-btns' },
+          h('a', { 'class': 'bk-btn bk-amz', href: b.amz, target: '_blank', rel: 'sponsored nofollow noopener' }, 'Amazonで見る'),
+          b.rakAff ? h('a', { 'class': 'bk-btn bk-rak', href: b.rak, target: '_blank', rel: 'sponsored nofollow noopener' }, '楽天ブックス') : null)));
+  }
+  function bookNote() { return h('p', { 'class': 'bk-note' }, 'PR　リンクには広告（アフィリエイト）を含みます。' + (BK && BK.amazon ? 'Amazonのアソシエイトとして、当サイトは適格販売により収入を得ています。' : '')); }
+  function sideBooks() {
+    var bs = pickBooks(weekCats(), 2); if (!bs.length) return null;
+    return h('section', { 'class': 'sidebox bk-box' }, h('h3', null, '次に読みたい本', h('span', { 'class': 'pr' }, 'PR')),
+      bs.map(function (b) { return bookCard(b, true); }), h('a', { href: 'books.html', 'class': 'bk-more' }, 'ジャンル別におすすめの本を見る →'), bookNote());
+  }
+  function homeBooks() {
+    var bs = pickBooks(weekCats(), 3); if (!bs.length) return null;
+    return h('section', { 'class': 'block bk-block' }, h('h2', null, '今週の出来事を、もっと深く学ぶ本', h('span', { 'class': 'pr' }, 'PR'), h('small', null, '経済の知識がまだ浅くても読める本から選んでいます')),
+      h('div', { 'class': 'bk-grid' }, bs.map(function (b) { return bookCard(b, false); })), h('p', { 'class': 'origin' }, h('a', { href: 'books.html' }, 'ジャンル別におすすめの本を見る →')), bookNote());
+  }
+  function listBooks(cat) {
+    var cats = (cat && cat !== 'all') ? [cat] : weekCats(), bs = pickBooks(cats, 2); if (!bs.length) return null;
+    return h('aside', { 'class': 'bk-strip' }, h('div', { 'class': 'bk-strip-h' }, 'この分野を学べる本', h('span', { 'class': 'pr' }, 'PR')),
+      h('div', { 'class': 'bk-grid2' }, bs.map(function (b) { return bookCard(b, true); })), bookNote());
+  }
   function renderSide() {
     if (!sideEl) return;
     sideEl.textContent = '';
@@ -432,6 +478,7 @@
         })) : h('p', { 'class': 'sub' }, 'ノートの「もっと調べたいこと」に書くと、ここに出ます。'),
         h('a', { href: '#notes' }, 'ノートを開く →')));
     }
+    var sb = sideBooks(); if (sb) sideEl.appendChild(sb);
     if (!glossEl) glossEl = buildGlossary();
     sideEl.appendChild(glossEl);
   }
@@ -529,6 +576,7 @@
       var stack = h('div', { 'class': 'stack' }); set.topics.forEach(function (t, i) { stack.appendChild(eventCard(t, i + 1)); }); blk.appendChild(stack);
     } else blk.appendChild(h('p', { 'class': 'empty' }, '出来事はまだありません。定期タスクの実行後に表示されます。'));
     page.appendChild(blk);
+    var hb = homeBooks(); if (hb) page.appendChild(hb);
     if (PUBLIC && window.Views && window.Views.enabled) page.appendChild(popularBlock());
     var tc = PUBLIC ? 0 : todoCount();
     if (!PUBLIC) page.appendChild(h('section', { 'class': 'block' }, h('h2', null, 'ノート'),
@@ -648,6 +696,7 @@
     function paint() {
       results.textContent = '';
       paintTp();
+      var lb = listBooks(state.cat); if (lb) results.appendChild(lb);
       var list = D.articles.filter(matches);
       results.appendChild(h('p', { 'class': 'count' }, list.length + '本'));
       var shown = list.slice(0, state.limit), last = null;

@@ -233,3 +233,28 @@ textarea, .notebox input.field { width: 100%; border: 1px solid var(--line); bac
 .rank, .why1 { display: none; }
 
 .booklist{padding-left:1.2em}.booklist li{margin:0 0 1em}
+
+/* ---- book boxes (affiliate, labelled PR) ---- */
+.pr { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; margin-left: 8px; line-height: 1.6; }
+.bk { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.bk:first-of-type { border-top: 0; }
+.bk-cover { flex: 0 0 56px; width: 56px; height: 80px; border-radius: 3px 6px 6px 3px; box-shadow: 0 2px 6px rgba(0,0,0,.18); object-fit: cover; background: var(--soft); }
+.bk-gen { display: flex; align-items: center; justify-content: center; padding: 5px; text-align: center; color: #fff; font-size: 10.5px; font-weight: 700; line-height: 1.3; overflow: hidden; background: linear-gradient(160deg, hsl(var(--hue), 62%, 46%), hsl(var(--hue), 58%, 32%)); border-left: 4px solid rgba(0,0,0,.25); }
+.bk-body { min-width: 0; flex: 1; }
+.bk-lv { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--soft); border-radius: 4px; padding: 0 6px; margin-bottom: 2px; }
+.bk-t { display: block; font-size: 14.5px; line-height: 1.45; }
+.bk-w { font-size: 13px; margin: 4px 0 6px; color: var(--ink); }
+.bk-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.bk-btn { display: inline-block; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 8px; padding: 6px 12px; min-height: 32px; line-height: 20px; }
+.bk-amz { background: #ff9900; color: #1a1a1a; }
+.bk-amz:hover { filter: brightness(1.07); }
+.bk-rak { background: #bf0000; color: #fff; }
+.bk-note { font-size: 11.5px; color: var(--muted); margin: 8px 0 0; line-height: 1.5; }
+.bk-more { display: inline-block; font-size: 13px; margin-top: 6px; }
+.bk-block .bk-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .bk-block .bk-grid { grid-template-columns: repeat(3, 1fr); } }
+.bk-block .bk { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+.bk-strip { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; }
+.bk-strip-h { font-size: 13.5px; font-weight: 700; }
+.bk-grid2 { display: grid; gap: 0 16px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .bk-grid2 { grid-template-columns: 1fr 1fr; } .bk-grid2 .bk { border-top: 0; } }
